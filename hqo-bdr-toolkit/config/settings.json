@@ -6,7 +6,7 @@
   },
   "deep_research": {
     "enabled": true,
-    "endpoint": "https://mushroomy-orpha-semiempirically.ngrok-free.dev/icp-research",
+    "endpoint": "https://ozzy.ngrok.io/icp-research",
     "auth_token": "clay-webhook-secret-2026"
   }
 }
