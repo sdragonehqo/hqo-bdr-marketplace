@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "hubspot": {
+      "type": "http",
+      "url": "https://mcp.hubspot.com/anthropic"
+    },
+    "clay": {
+      "type": "http",
+      "url": "https://api.clay.com/v3/mcp"
+    },
+    "gmail-read": {
+      "type": "http",
+      "url": "https://mcp.google.com/gmail"
+    },
+    "gmail": {
+      "url": "https://server.smithery.ai/gmail"
+    },
+    "zoominfo": {
+      "type": "http",
+      "url": "https://mcp.zoominfo.com/mcp"
+    }
+  }
+}
