@@ -6,9 +6,10 @@ Cowork plugin for HqO BDR prospecting — research target accounts, generate per
 
 1. **Research** — Enriches target companies via Clay + HubSpot (portfolio size, markets, contacts, news)
 2. **Score** — Calculates ICP fit and deal size tier
-3. **Map** — Discovers and validates contacts by persona priority
-4. **Write** — Generates Challenger-method emails with customer proof points
-5. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
+3. **Deep Research** — Optionally calls Ozzy (autonomous web agent) to validate ICP, verify portfolio details, and surface people intel (LinkedIn, press, conferences) for key contacts
+4. **Map** — Discovers and validates contacts by persona priority, enriched with Ozzy's people intel
+5. **Write** — Generates Challenger-method emails with customer proof points and contact-specific openers
+6. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
 
 ## Getting Started
 
@@ -57,7 +58,7 @@ Jump straight to prospecting:
 hqo-bdr-outreach/
 ├── .claude-plugin/plugin.json        # Plugin manifest
 ├── .mcp.json                         # MCP connector config
-├── config/settings.json              # BDR personalization
+├── config/settings.json              # BDR personalization + deep research config
 ├── commands/
 │   ├── onboard.md                    # /hqo:onboard (start here)
 │   ├── setup.md                      # /hqo:setup
@@ -70,6 +71,11 @@ hqo-bdr-outreach/
 │   │   └── references/
 │   │       ├── icp-criteria.md       # ICP definition & tiering
 │   │       └── customer-references.md # Customer proof point rules
+│   ├── deep-research/
+│   │   ├── SKILL.md                  # Ozzy deep research integration
+│   │   └── references/
+│   │       ├── ozzy-response-schema.md       # Response field docs
+│   │       └── research-to-workflow-mapping.md # Field → workflow mapping
 │   └── email-generation/
 │       ├── SKILL.md                  # Email writing rules
 │       └── references/

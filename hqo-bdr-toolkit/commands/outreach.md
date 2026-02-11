@@ -23,6 +23,15 @@ Run the full BDR prospecting workflow for a target account.
    - Assign tier (1–4) per `references/icp-criteria.md`
    - Flag timing triggers from Clay news results
 
+2b. **Deep Research (Ozzy)**
+   - If `deep_research.enabled` in `config/settings.json`, call the research wrapper with company_name, domain, and hubspot_id
+   - Tell BDR: "Running deep research — Ozzy is crawling the web for detailed intel. Takes about a minute..."
+   - Validate ICP: if Ozzy returns "Not a Fit", **stop** — present both assessments with reasons and require BDR confirmation before continuing
+   - Merge verified portfolio data (buildings, markets, asset classes) into company profile
+   - Collect people intel (LinkedIn, press, conferences) for Tier 1+2 contacts
+   - If wrapper is unreachable, continue with Clay+HubSpot data — note "Deep research unavailable" in output
+   - See `skills/deep-research/SKILL.md` for full details
+
 3. **Contact Mapping**
    - Search HubSpot for existing contacts at the company
    - Use Clay to discover additional contacts by title
@@ -42,6 +51,7 @@ Run the full BDR prospecting workflow for a target account.
 
 6. **Output**
    - ICP Match Rating (tier + rationale)
+   - Deep Research Insights (confidence score, reasons for/against, data gaps, verified portfolio, people intel, recommended action — omit if unavailable)
    - Company Overview
    - Recent Triggers
    - Key Contacts table (validated)

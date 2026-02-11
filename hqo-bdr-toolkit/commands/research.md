@@ -15,13 +15,15 @@ Research-only mode. Runs steps 1–4 of the outreach workflow (no email generati
 
 1. **Company Identification** — HubSpot lookup + Clay enrichment
 2. **ICP Scoring** — Tier assignment with deal size rationale
-3. **Contact Mapping** — HubSpot contacts + Clay discovery, engagement validation
-4. **Customer Parallels** — HubSpot customer query by market/asset class
+2b. **Deep Research (Ozzy)** — Autonomous web research to validate ICP and deepen portfolio/people intel. If Ozzy returns "Not a Fit", stop and present conflict to BDR. If wrapper unavailable, continue with Clay+HubSpot data. See `skills/deep-research/SKILL.md`.
+3. **Contact Mapping** — HubSpot contacts + Clay discovery, engagement validation. Enriched with Ozzy's people intel for Tier 1+2 contacts when available.
+4. **Customer Parallels** — HubSpot customer query by market/asset class. Uses Ozzy's verified markets when available.
 
 ## Output
 
 - ICP Match Rating
-- Company Overview (portfolio, markets, asset classes, ownership)
+- Deep Research Insights (confidence score, reasons for/against, data gaps, verified portfolio, people intel, recommended action — omit if unavailable)
+- Company Overview (portfolio, markets, asset classes, ownership — uses verified data from deep research when available)
 - Recent Triggers (news, hires, construction)
 - Key Contacts table (validated statuses)
 - Customer Parallels

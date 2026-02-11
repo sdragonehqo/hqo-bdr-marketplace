@@ -21,6 +21,7 @@ Collect account-level context reusable across all emails:
 1. HubSpot — company record, portfolio size, markets, last activity
 2. Clay — company enrichment (ownership, headcount, news, custom research), contact discovery + emails
 3. Customer parallels — HubSpot query for customers in same markets (follow rules in `references/customer-references.md`)
+4. Deep Research (Ozzy) — If available from step 2b, pull verified portfolio details, research summary, and people-specific intel (LinkedIn activity, press mentions, conference appearances, published articles). Ozzy's data takes priority over Clay for portfolio specifics and personalization depth.
 
 ### Step 2: Segment Contacts
 
@@ -41,6 +42,12 @@ For each contact, use persona templates from `references/persona-angles.md`:
 3. Personalize opening (title, tenure, news, unique attribute)
 4. Body aligned with persona pain/value
 5. Soft/direct CTA (conversation, not demo)
+6. If deep research people intel is available for a contact, use it as the opener — this takes priority over generic portfolio references:
+   - Conference appearance: "Enjoyed your panel at [Event] on [Topic]..."
+   - Published article: "Your piece on [Topic] in [Publication] resonated..."
+   - LinkedIn post: "Your recent post about [Topic] caught my attention..."
+   - Press quote: "Saw your quote in [Publication] about [Topic]..."
+   These openers are far more effective than generic portfolio references. Prioritize for Tier 1 contacts especially.
 
 ### Step 4: Output
 
