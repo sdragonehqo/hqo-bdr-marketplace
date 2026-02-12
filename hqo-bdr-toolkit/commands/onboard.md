@@ -89,39 +89,77 @@ After verifying Slack is connected, confirm access to the `#ozzy` channel:
 After all connectors are checked:
 > **All connectors are set!** That's the hardest part done. Now let's make sure your emails will look professional.
 
-### Phase 3: Gmail Signature
+### Phase 3: Email Signature Setup
 
-> When I create email drafts for you, I write the body and end with "Best, [Your Name]". Gmail automatically adds your email signature when you send the draft.
+> When I create email drafts for you, I need to include your signature directly in the draft body. The Gmail connector can't pull your signature automatically, so I need the HTML for your HqO-branded signature.
 >
-> So your signature needs to be set up in Gmail. Do you already have an HqO-branded signature in Gmail?
+> This way, every draft I put in your inbox is ready to send — signature and all.
 
-Wait for their answer.
+Walk the BDR through getting their signature HTML. There are two paths:
 
-**If yes:**
-> Perfect — you're all set on signatures. Let's move on.
+**Path A: They have an HTML signature file from their manager or GTM Engineering**
 
-**If no or unsure:**
-Walk them through it step by step:
+> If your manager or GTM Engineering gave you a `.html` signature file, that's the easiest path. Here's how to get me the HTML:
+>
+> 1. Find the `.html` file on your computer (check Downloads, Desktop, or your email for it)
+> 2. **Right-click** the file → **Open with** → choose a **text editor** (TextEdit on Mac, Notepad on Windows) — NOT a browser
+> 3. You'll see the raw HTML code — it'll look like `<table>` tags and `<td>` tags with your name, title, etc.
+> 4. **Select all** (Cmd+A / Ctrl+A), **copy** (Cmd+C / Ctrl+C), and **paste it here** in our chat
+>
+> I'll save it to your config so every draft includes your signature automatically.
 
-> No problem — let me walk you through it. Open Gmail in your browser (mail.google.com) and follow along:
+**Path B: They don't have an HTML file but have a signature set up in Gmail already**
+
+> No worries — we can grab it from Gmail. Here's how:
 >
-> 1. Click the **gear icon** (top right) → **See all settings**
-> 2. Scroll down to the **Signature** section
-> 3. Click **+ Create new** and name it "HqO Standard"
-> 4. Add your signature with:
->    - Your full name
->    - Your title | HqO
->    - Your phone number | your email
->    - hqo.co
+> 1. Open **Gmail** in your browser (mail.google.com)
+> 2. Click the **gear icon** (top right) → **See all settings**
+> 3. Scroll down to the **Signature** section
+> 4. Click inside the signature editor box where your signature is displayed
+> 5. **Select all** the signature content (Cmd+A / Ctrl+A)
+> 6. **Copy** it (Cmd+C / Ctrl+C)
+> 7. Now open a new **Google Doc** (docs.google.com) or any text editor
+> 8. **Paste** the signature there (Cmd+V / Ctrl+V) — this preserves the formatting
+> 9. In that Google Doc, go to **File → Download → Web Page (.html, zipped)**
+> 10. Open the downloaded `.zip`, find the `.html` file inside
+> 11. **Right-click** the `.html` file → **Open with** a text editor (NOT a browser)
+> 12. **Select all** (Cmd+A / Ctrl+A), **copy** (Cmd+C / Ctrl+C), and **paste it here**
 >
-> If your manager or GTM Engineering gave you an HTML signature file:
-> 1. Open the .html file in Chrome (double-click or drag into browser)
-> 2. Select all (Ctrl+A / Cmd+A), copy (Ctrl+C / Cmd+C)
-> 3. Paste into the Gmail signature editor
+> I know that's a few steps — but you only need to do this once.
+
+**Path C: They have no signature at all**
+
+> No problem — let's create one. You'll need:
+> - Your full name
+> - Your title
+> - Your phone number
+> - Your HqO email
 >
-> Under **Signature defaults**, set it as the default for BOTH "New emails" AND "Replies/forwards", then Save Changes.
+> Tell me those details and I'll generate a clean HTML signature for you.
+
+When they provide the details, generate a simple, professional HTML signature block:
+
+```html
+<table cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #333333;">
+  <tr><td style="font-weight: bold; font-size: 14px;">[Full Name]</td></tr>
+  <tr><td style="color: #666666;">[Title] | HqO</td></tr>
+  <tr><td>[Phone] | <a href="mailto:[Email]" style="color: #1a73e8; text-decoration: none;">[Email]</a></td></tr>
+  <tr><td><a href="https://hqo.co" style="color: #1a73e8; text-decoration: none;">hqo.co</a></td></tr>
+</table>
+```
+
+Show the generated HTML to the BDR and ask if it looks right. Offer to adjust.
+
+**After receiving the signature HTML (any path):**
+
+1. Save the raw HTML string to `config/settings.json` under `bdr.signature_html`
+2. Confirm to the BDR:
+
+> ✓ **Signature saved!** Here's a preview of what it'll look like in your drafts:
 >
-> Let me know when you're done, or if you need help finding the HTML file.
+> [render a plain-text representation of the signature for them to verify]
+>
+> Every email draft I create will include this signature at the bottom. If you ever need to update it, run `/hqo:setup`.
 
 Wait for confirmation before moving on.
 
@@ -138,13 +176,14 @@ Ask these one at a time, waiting for each answer:
    - **Casual** — conversational and warm
    - **Consultative** — advisory and insight-led
 
-Save answers to `config/settings.json`:
+Save answers to `config/settings.json` (the `signature_html` field was already saved in Phase 3):
 ```json
 {
   "bdr": {
     "name": "[their name]",
     "email": "[their email]",
-    "tone": "[their choice]"
+    "tone": "[their choice]",
+    "signature_html": "[already saved from Phase 3]"
   }
 }
 ```

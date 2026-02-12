@@ -9,7 +9,7 @@ description: Generate persona-specific outreach emails for HqO BDR prospecting. 
 
 - **Length:** 150–200 words max
 - **CTA:** Soft but direct — suggest brief conversation, never a demo
-- **Signature:** Just `Best,\n[BDR First Name]` — full sig appended by Gmail
+- **Signature:** End the plain-text body with `Best,\n[BDR First Name]`. When creating the Gmail draft, the BDR's HTML signature from `config/settings.json` → `bdr.signature_html` is appended after the body. The draft is sent as HTML (`is_html: true`) so the signature renders correctly. If `signature_html` is empty, fall back to plain text with no signature block.
 - **Personalization required:** Specific portfolio/markets, recent trigger, market-matched customer reference (verified asset class), platform capabilities at high level
 - **Tone:** Match BDR preference from settings; default professional/consultative
 

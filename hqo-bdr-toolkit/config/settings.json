@@ -2,7 +2,8 @@
   "bdr": {
     "name": "Sal",
     "email": "sal.dragone@hqo.co",
-    "tone": "professional"
+    "tone": "professional",
+    "signature_html": ""
   },
   "deep_research": {
     "enabled": true,

@@ -62,8 +62,28 @@ Each draft maps to a single `create_email_draft` tool call:
 |-------|---------|---------|
 | Contact email | `recipient_email` | `claire.outram@brookfield.com` |
 | Subject line | `subject` | `Brookfield's tenant retention gap` |
-| Email body | `body` | Plain text with `\n` line breaks |
+| Email body + signature | `body` | Assembled HTML (see below) |
+| HTML flag | `is_html` | `true` (when signature present) |
 | BDR email | Sender (auto from Gmail connector) | `sal.dragone@hqo.co` |
+
+### Body Assembly (Signature Append)
+
+The `body` sent to `create_email_draft` is assembled at draft creation time (not during email generation):
+
+1. Take the plain-text email body (with `\n` line breaks)
+2. Convert line breaks to `<br>` for HTML rendering
+3. Read `bdr.signature_html` from `config/settings.json`
+4. If `signature_html` is non-empty:
+   - Append `<br><br>` as a spacer after the sign-off
+   - Append the raw `signature_html` value
+   - Set `is_html: true` on the `create_email_draft` call
+5. If `signature_html` is empty (BDR hasn't provided one yet):
+   - Send as plain text (`is_html: false`) with no signature block
+
+Example assembled body:
+```html
+Hi Claire,<br><br>Body text here...<br><br>Best,<br>Sal<br><br><table cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif;">...</table>
+```
 
 ## Priority Order
 
@@ -77,10 +97,11 @@ Drafts are created in priority order:
 
 ## Body Rules
 
-- Plain text only — no HTML tags
-- Line breaks use `\n`
-- End with `Best,\n[BDR Name]` — no signature block in body
-- Gmail will apply BDR's default signature automatically
+- Email body is generated as plain text with `\n` line breaks
+- End with `Best,\n[BDR Name]` — the HTML signature is appended separately at draft creation time
+- The BDR's `signature_html` from `config/settings.json` is appended after the sign-off when creating the Gmail draft
+- The Gmail connector does NOT auto-append signatures — we handle this ourselves
+- If no signature HTML is configured, drafts are created as plain text without a signature block
 
 ## Validation (Before Creating Drafts)
 
