@@ -19,27 +19,42 @@ Deep research runs **after** Step 2 (ICP Scoring) and **before** Step 3 (Contact
 
 ## Calling Ozzy
 
-Read the endpoint URL and auth token from `config/settings.json` under `deep_research`.
+Read the Slack channel config from `config/settings.json` under `deep_research`.
 
-Make an HTTP POST request:
+### Step 1: Send Request
 
+Send a message to the `#ozzy` Slack channel using the Slack MCP `slack_send_message` tool:
+
+- **channel_id:** Use `deep_research.slack_channel_id` from settings
+- **message:** Format as: `@Ozzy ICP:{hubspot_id},{domain},{company_name}`
+
+Example:
 ```
-POST {deep_research.endpoint}
-Authorization: Bearer {deep_research.auth_token}
-Content-Type: application/json
-
-{
-  "company_name": "[from Step 1 — colloquial name]",
-  "domain": "[from Step 1 or Clay enrichment]",
-  "hubspot_id": "[from Step 1 HubSpot search, or empty string if none]"
-}
+@Ozzy ICP:61514582769,gcomfort.com,George Comfort & Sons
 ```
-
-Use whatever HTTP execution tool is available in the runtime (execute-request, fetch, etc.) to make this POST. The endpoint returns a synchronous JSON response.
 
 **Tell the BDR:** "Running deep research on [company] — Ozzy is crawling the web for detailed portfolio and people intel. This takes about a minute..."
 
-The response will be JSON matching the schema in `references/ozzy-response-schema.md`.
+### Step 2: Wait for Response
+
+Wait `deep_research.wait_seconds` (default: 90 seconds) for Ozzy to process.
+
+### Step 3: Read Response
+
+Read the `#ozzy` channel using the Slack MCP `slack_read_channel` tool:
+
+- **channel_id:** Same channel ID from settings
+- **limit:** 10 (to capture Ozzy's full response — Ozzy may post multiple messages)
+
+Look for messages from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`). The structured JSON response will be in a code block (``` delimited) containing all `clay_*` fields matching the schema in `references/ozzy-response-schema.md`.
+
+### Parsing the Response
+
+1. Find the message from Ozzy that contains a JSON code block with `hubspot_id` matching your request
+2. Parse the JSON from inside the code block
+3. The response will match the schema in `references/ozzy-response-schema.md`
+
+If Ozzy posts multiple messages (narrative + JSON), use the one with the structured JSON code block.
 
 ## Handling the Response
 
@@ -94,11 +109,11 @@ This intel feeds directly into email personalization in Step 5. See `references/
 
 | Scenario | Action |
 |----------|--------|
-| Wrapper unreachable (network error, ngrok down) | Log "Deep research unavailable — continuing with Clay+HubSpot data." Continue workflow. |
-| Non-200 HTTP response | Log the error. Continue workflow without deep research data. |
-| Response timeout (>3 minutes) | The wrapper has a built-in 3-minute timeout. If no response, continue workflow. |
+| Slack send fails or Ozzy bot is offline | Log "Deep research unavailable — continuing with Clay+HubSpot data." Continue workflow. |
+| No response from Ozzy in `#ozzy` after `max_wait_seconds` | Read channel one more time. If still no response, continue workflow without deep research. |
 | Response missing fields | Use whatever fields are present. Missing fields = use Clay/HubSpot data for those. |
 | `clay_icp` = "Not a Fit" | **Hard stop.** Present conflict. Require BDR confirmation. See ICP Validation above. |
+| Multiple responses in channel (from previous runs) | Match on `hubspot_id` inside the JSON to find the correct response. Use the most recent matching message. |
 
 ## Graceful Degradation
 

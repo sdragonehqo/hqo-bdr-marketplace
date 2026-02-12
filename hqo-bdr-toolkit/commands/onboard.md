@@ -23,7 +23,7 @@ Start with:
 > I'm going to walk you through getting everything set up. This takes about 10 minutes and you only need to do it once.
 >
 > Here's what we'll cover:
-> 1. Check your connectors (HubSpot, Clay, Gmail)
+> 1. Check your connectors (HubSpot, Clay, Gmail, Slack)
 > 2. Make sure your Gmail signature is ready
 > 3. Save your BDR profile
 > 4. Run a quick test
@@ -67,6 +67,24 @@ Check each required connector by attempting a lightweight call. Explain what eac
 - If only one works: Explain which one is missing and why they need it
   - "The draft connector isn't connected. Without it, I can research accounts and generate emails, but I won't be able to put them in your Gmail drafts. Let me walk you through connecting it..."
 - If neither works: Walk through connecting both, one at a time
+
+**Slack:**
+> Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run outreach on a company, the plugin sends a message to the `#ozzy` Slack channel with `@Ozzy` to trigger it. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel. The plugin reads those results right from Slack.
+>
+> Let me check if Slack is connected...
+
+- Try a lightweight Slack call (e.g., `slack_search_channels` with query "ozzy")
+- If it works: "✓ Slack is connected! I can see the #ozzy channel."
+- If it fails: Same guided flow — walk them through Settings → Connectors → Slack → Connect
+  - "Slack isn't connected yet. Go to **Settings** (gear icon) → **Connectors** → find **Slack** → click **Connect**"
+  - "Sign in with your HqO Slack workspace credentials and grant the permissions it asks for"
+  - "Come back here and tell me when you're done — I'll check again"
+  - Wait for them to confirm, then re-test
+
+After verifying Slack is connected, confirm access to the `#ozzy` channel:
+- Try `slack_read_channel` with channel_id `C0AEK5BFHSA` and limit `1`
+- If it works: "✓ I can read the #ozzy channel — Ozzy is ready to go."
+- If it fails: "I can't access the #ozzy channel. You may need to join it first — search for `#ozzy` in Slack and click Join. Let me know when you're in."
 
 After all connectors are checked:
 > **All connectors are set!** That's the hardest part done. Now let's make sure your emails will look professional.
@@ -144,17 +162,19 @@ Wait for their answer, then run `/hqo:research` on the company they choose (or B
 
 After results come in, walk them through the output:
 
-> Here's what the plugin found. Let me explain each section:
+> Here's what the plugin found. Let me explain each section and the tools behind them:
 >
-> **ICP Score** — This rates how well the company fits our ideal customer profile, based on portfolio size and deal potential.
+> **ICP Score** — Rates how well the company fits our ideal customer profile, based on portfolio size and deal potential. This comes from **Clay** (company enrichment) and **HubSpot** (CRM data).
 >
-> **Company Overview** — Background pulled from Clay and HubSpot.
+> **Deep Research Insights** — If deep research is enabled, the plugin sends a message to the **#ozzy Slack channel** with `@Ozzy` to trigger autonomous web research. Ozzy crawls company websites, press releases, SEC filings, LinkedIn profiles, and conference speaker lists. After about a minute, Ozzy posts back structured results — portfolio verification, ICP validation, and people intel — which the plugin reads directly from Slack. This goes far beyond what Clay or HubSpot provide.
 >
-> **Key Contacts** — People at the company mapped by priority. Asset Managers and executives come first because they're our primary buyers.
+> **Company Overview** — Background pulled from **Clay** and **HubSpot**, enriched with Ozzy's findings when available.
 >
-> **Customer Parallels** — Existing HqO customers in the same market that we can reference in outreach.
+> **Key Contacts** — People at the company mapped by priority using **Clay** (contact discovery) and **HubSpot** (existing records). Asset Managers and executives come first because they're our primary buyers. When Ozzy runs, it also surfaces LinkedIn activity, press mentions, and conference appearances for top contacts — these become personalized email openers.
 >
-> **Engagement Status** — Shows if anyone on the team has already reached out to these contacts.
+> **Customer Parallels** — Existing HqO customers in the same market, pulled from **HubSpot**, that we can reference in outreach.
+>
+> **Engagement Status** — Shows if anyone on the team has already reached out to these contacts, from **HubSpot** engagement history.
 
 Then:
 > That's the research side. When you're ready to actually generate outreach emails, you'd run `/hqo:outreach [company]` — same thing but with personalized emails at the end. Then `/hqo:push-drafts` to put them in your Gmail.
@@ -163,13 +183,25 @@ Then:
 
 > **You're all set!** Here's your cheat sheet:
 >
+> **Commands:**
+>
 > | Command | What It Does |
 > |---------|-------------|
 > | `/hqo:outreach [company]` | Full workflow — research + emails |
 > | `/hqo:research [company]` | Research only, no emails |
 > | `/hqo:push-drafts` | Create Gmail drafts from generated emails |
+> | `/hqo:setup` | Update your name, email, or tone preference |
 >
-> Start with `/hqo:outreach [company]` whenever you're ready to prospect a new account. The plugin handles the rest.
+> **What's working behind the scenes:**
+>
+> | Tool | What It Does |
+> |------|-------------|
+> | **HubSpot** | CRM lookups — company records, contacts, engagement history |
+> | **Clay** | Company enrichment — portfolio size, markets, news, additional contacts |
+> | **Ozzy (via Slack)** | Deep web research — sends `@Ozzy` in `#ozzy` channel, gets back verified portfolio data, ICP validation, and people intel (LinkedIn, press, conferences) |
+> | **Gmail** | Creates draft emails directly in your inbox for review before sending |
+>
+> Start with `/hqo:outreach [company]` whenever you're ready to prospect a new account. The plugin handles the rest — pulling data from HubSpot and Clay, calling Ozzy for deep research via Slack, then generating personalized emails and putting them in your Gmail drafts.
 >
 > Any questions?
 
@@ -181,7 +213,7 @@ Then:
 
 ## Important Rules
 
-- NEVER skip the connector checks. A missing connector will break the workflow later and the BDR won't know why.
+- NEVER skip the connector checks (HubSpot, Clay, Gmail, Slack). A missing connector will break the workflow later and the BDR won't know why.
 - NEVER assume connectors are working — always test them with an actual call.
 - ALWAYS wait for the BDR's response before moving to the next phase. This is a conversation, not a monologue.
 - Keep each message focused on ONE thing. Don't dump a wall of text.

@@ -1,5 +1,8 @@
 # Ozzy Response Schema
 
+> **Delivery:** Ozzy posts this JSON as a code block in the `#ozzy` Slack channel.
+> The agent reads it via the Slack MCP `slack_read_channel` tool.
+
 Ozzy (OpenClaw agent) returns structured JSON from autonomous web research. All fields use the `clay_` prefix — these come from Ozzy's research wrapper, NOT from the Clay MCP connector.
 
 ## Response Fields

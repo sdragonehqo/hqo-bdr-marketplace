@@ -6,7 +6,12 @@
   },
   "deep_research": {
     "enabled": true,
-    "endpoint": "https://ozzy.ngrok.io/icp-research",
-    "auth_token": "clay-webhook-secret-2026"
+    "method": "slack",
+    "slack_channel_id": "C0AEK5BFHSA",
+    "slack_channel_name": "#ozzy",
+    "ozzy_bot_user_id": "U0AFG7T5ALQ",
+    "request_format": "@Ozzy ICP:{hubspot_id},{domain},{company_name}",
+    "wait_seconds": 90,
+    "max_wait_seconds": 180
   }
 }
