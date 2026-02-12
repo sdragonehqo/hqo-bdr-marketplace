@@ -9,27 +9,22 @@
 │  ┌────────────────────────────────────────────────┐  │
 │  │              Cowork Desktop App                 │  │
 │  │                                                │  │
-│  │  /hqo:outreach "Brookfield Properties"         │  │
+│  │  /hqo:research "Brookfield Properties"         │  │
 │  │       │                                        │  │
 │  │       ▼                                        │  │
 │  │  ┌─────────────┐  ┌────────────────────────┐   │  │
 │  │  │  Skills      │  │  MCP Connectors        │   │  │
 │  │  │  prospecting │  │  ├─ HubSpot (CRM)      │   │  │
 │  │  │  deep-resrch │  │  ├─ Clay (Enrich)      │   │  │
-│  │  │  email-gen   │  │  └─ Gmail (Drafts)     │   │  │
-│  │  │  references/ │  │                        │   │  │
+│  │  │  email-gen   │  │  ├─ Slack (Ozzy)       │   │  │
+│  │  │  references/ │  │  └─ Gmail (Drafts)     │   │  │
 │  │  └──────┬──────┘  └────────────────────────┘   │  │
 │  │         │                                      │  │
-│  │         ├──► Step 2b: Deep Research ───────┐   │  │
-│  │         │                                  │   │  │
-│  │         │    ┌─────────────────────────┐    │   │  │
-│  │         │    │  Sync Wrapper (Laptop)  │◄───┘   │  │
-│  │         │    │  ngrok → Proxy → Ozzy   │        │  │
-│  │         │    │  (OpenClaw web research) │        │  │
-│  │         │    └─────────────────────────┘        │  │
+│  │         │  Step 2: Ozzy handles ICP scoring,   │  │
+│  │         │  portfolio, champions, sales angle    │  │
 │  │         │                                      │  │
 │  │         ▼                                      │  │
-│  │  /hqo:push-drafts                             │  │
+│  │  /hqo:draft-emails                            │  │
 │  │       │                                        │  │
 │  │       ├──► Save JSON draft file for review     │  │
 │  │       └──► Gmail MCP → Drafts created          │  │
@@ -47,18 +42,17 @@
 
 ## Data Flow
 
-1. BDR runs `/hqo:outreach Brookfield Properties` in Cowork
-2. Plugin autonomously:
+1. BDR runs `/hqo:research Brookfield Properties` in Cowork
+2. Plugin step-by-step (pausing between each step for BDR review):
    - Searches HubSpot for existing records
    - Enriches via Clay (portfolio, contacts, news)
-   - Scores ICP fit
-   - **Runs deep research via Ozzy** (if enabled) — validates ICP, enriches portfolio details, surfaces people intel for Tier 1+2 contacts
-   - If Ozzy returns "Not a Fit" → **stops and presents conflict** to BDR for confirmation
-   - Maps contacts by persona, enriched with Ozzy's people intel when available
+   - **Ozzy runs automatically** — handles ICP scoring, portfolio verification, key champions, sales angle, and news via Slack
+   - Ozzy's findings pushed to HubSpot (with BDR approval)
+   - Maps contacts by persona, enriched with Ozzy's key champion intel
    - Validates engagement history
-   - Finds customer parallels in same market (using Ozzy's verified markets when available)
-   - Generates personalized emails (using people intel for openers when available)
-3. BDR reviews output, runs `/hqo:push-drafts`
+   - Finds customer parallels in same market (using Ozzy's verified markets/asset classes)
+   - Generates personalized emails using Ozzy's sales angle and champion intel
+3. BDR reviews output, runs `/hqo:draft-emails`
 4. Plugin saves `drafts-brookfield-properties-2026-02-10.json` to workspace for review
 5. BDR confirms in chat
 6. Plugin creates Gmail drafts directly via Gmail MCP connector
@@ -70,11 +64,11 @@
 
 **Current approach** uses Cowork's built-in MCP connectors + on-demand skill loading. BDRs just need:
 - Cowork with the plugin installed
-- HubSpot, Clay, and Gmail connectors enabled
+- HubSpot, Clay, Slack, and Gmail connectors enabled
 
 No API keys. No webhooks. No external tools. Everything runs through the connectors the BDR already has.
 
-**Deep research** adds an optional HTTP call to a sync wrapper running on a dedicated laptop. The wrapper calls Ozzy (OpenClaw agent) for autonomous web research — crawling company sites, press, SEC filings, LinkedIn, conference speaker lists. If the wrapper is unreachable, the workflow continues with Clay+HubSpot data only.
+**Ozzy** is Claude's research tool — it handles ICP scoring, portfolio verification, key champions, and sales angle development so Claude doesn't duplicate that work. The plugin sends a message to the `#ozzy` Slack channel, Ozzy crawls the web and posts structured JSON back, and Claude uses that output directly. If Ozzy is unavailable, Claude falls back to Clay+HubSpot data with basic ICP scoring.
 
 ## MCP Connectors Required
 
@@ -82,16 +76,9 @@ No API keys. No webhooks. No external tools. Everything runs through the connect
 |-----------|---------|----------|
 | HubSpot | CRM lookup, contact mapping, customer parallels, engagement history | Yes |
 | Clay | Company enrichment, contact discovery, news/triggers | Yes |
+| Slack | Ozzy research tool (ICP scoring, portfolio data, key champions, sales angles) | Yes |
 | Gmail | Create drafts directly in BDR's inbox | Yes |
 | ZoomInfo | Supplemental contact enrichment | Optional |
-
-### External Services
-
-| Service | Protocol | Purpose | Required |
-|---------|----------|---------|----------|
-| Sync Wrapper → Ozzy | HTTP POST | Deep web research — ICP validation, portfolio verification, people intel | Optional |
-
-The sync wrapper is NOT an MCP connector. It's an HTTP endpoint (`config/settings.json` → `deep_research.endpoint`) running on a dedicated laptop behind ngrok. The wrapper converts async OpenClaw agent calls into synchronous request-response.
 
 ## Token Efficiency
 
@@ -99,9 +86,9 @@ The plugin uses on-demand skill loading — only the relevant skill files load w
 
 | Component | Loads When |
 |-----------|-----------|
-| prospecting/SKILL.md | /hqo:research or /hqo:outreach |
-| deep-research/SKILL.md | /hqo:research or /hqo:outreach (only if `deep_research.enabled`) |
-| email-generation/SKILL.md | /hqo:outreach |
+| prospecting/SKILL.md | /hqo:research |
+| deep-research/SKILL.md | /hqo:research (Step 2 — Ozzy research) |
+| email-generation/SKILL.md | /hqo:research (email generation step) |
 | references/* | Only when referenced by parent skill |
 | commands/* | Only when the specific command is invoked |
 
@@ -112,9 +99,8 @@ The plugin uses on-demand skill loading — only the relevant skill files load w
 - No credentials stored in plugin files — all auth handled by Cowork connectors
 - No PII stored in plugin — all data flows through MCP at runtime
 - BDR settings (name, email, tone) stored locally in config/settings.json
-- Deep research auth token stored in config/settings.json — only used for the sync wrapper endpoint
-- Deep research is additive — if wrapper is unreachable, workflow continues without it
-- Ozzy's research data flows through at runtime only — no research results cached in plugin files
+- Ozzy research data flows through at runtime only — no research results cached in plugin files
+- If Ozzy is unreachable, workflow falls back to Clay+HubSpot data
 
 ## Cost
 
@@ -122,4 +108,4 @@ The plugin uses on-demand skill loading — only the relevant skill files load w
 - **Clay:** Existing credits
 - **HubSpot MCP:** Included with Pro
 - **Gmail MCP:** Free (built into Cowork)
-- **Deep Research (Ozzy):** OpenClaw agent running on dedicated laptop — no per-query cost beyond existing infrastructure
+- **Ozzy:** OpenClaw agent running on dedicated laptop — no per-query cost beyond existing infrastructure

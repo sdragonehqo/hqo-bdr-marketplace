@@ -1,18 +1,46 @@
 ---
 name: onboard
-description: Guided first-time onboarding for new BDRs. Walks through connector setup, Gmail signature, plugin configuration, and a test run — all in one conversation.
+description: Guided onboarding and settings management for BDRs. First-time setup walks through connectors, Gmail signature, and profile config. Returning BDRs can update any setting.
 arguments: []
 ---
 
 # /hqo:onboard
 
-Full guided onboarding for a new BDR. This is the FIRST command a new user should run. It replaces the need to read any documentation — everything happens interactively in this conversation.
+Guided onboarding for BDRs. For first-time users, this walks through full setup. For returning users, this is also how they update settings (name, email, tone, signature).
 
 ## Tone
 
 Be friendly, clear, and encouraging. This person may have never used Cowork before. Explain what each step does and WHY before asking them to do it. Use simple language — no jargon. Celebrate small wins ("Great, HubSpot is connected!").
 
-## Flow
+## Detecting First-Time vs. Returning
+
+Read `config/settings.json` at the start.
+
+**If `bdr.name` is empty or not set:** This is a first-time user. Run the full flow (Phases 1–6).
+
+**If `bdr.name` is already populated:** This is a returning user. Show current settings and ask what they want to update:
+
+> Here are your current settings:
+>
+> - **Name:** [bdr.name]
+> - **Email:** [bdr.email]
+> - **Tone:** [bdr.tone]
+> - **Signature:** [show "Configured" if `bdr.signature_html` is non-empty, or "Not configured" if empty]
+>
+> What would you like to update?
+
+Let them pick one or more: Name, Email, Tone, Signature. Walk through each selected update:
+
+- **Name/Email/Tone:** Ask for the new value, confirm, save.
+- **Signature:** Follow the same auto-extraction as Phase 3 below (send yourself an email, plugin extracts it). If extraction fails, fall back to manual generation.
+
+Save all updates to `config/settings.json`, confirm the new values, and remind them: "Run `/hqo:research [company]` to start prospecting."
+
+If the BDR's signature is empty and they're not updating it, gently remind them: "Heads up — you don't have a signature configured yet. Drafts will be created without one. Want to add it now?"
+
+---
+
+## Full First-Time Flow
 
 ### Phase 1: Welcome
 
@@ -40,7 +68,7 @@ Check each required connector by attempting a lightweight call. Explain what eac
 > Let me check if it's connected...
 
 - Try a simple HubSpot call (e.g., `get_user_details` or search for a known company)
-- If it works: "✓ HubSpot is connected!"
+- If it works: "HubSpot is connected!"
 - If it fails: "HubSpot isn't connected yet. Here's how to fix it:"
   - "Go to **Settings** (gear icon) → **Connectors** → find **HubSpot** → click **Connect**"
   - "Sign in with your HqO HubSpot credentials and grant the permissions it asks for"
@@ -51,7 +79,7 @@ Check each required connector by attempting a lightweight call. Explain what eac
 > Clay enriches companies with data we don't have in HubSpot — portfolio size, recent news, additional contacts, and market intel.
 
 - Try `get-credits-available` or similar lightweight Clay call
-- If it works: "✓ Clay is connected! You have credits available."
+- If it works: "Clay is connected! You have credits available."
 - If it fails: Same guided flow as HubSpot — walk them through Settings → Connectors → Clay → Connect
 
 **Gmail (BOTH connectors):**
@@ -63,27 +91,22 @@ Check each required connector by attempting a lightweight call. Explain what eac
 
 - Test the read connector (e.g., `read_gmail_profile`)
 - Test the draft connector (e.g., `get_profile` from the gmail tools or `list_labels`)
-- If both work: "✓ Both Gmail connectors are connected!"
+- If both work: "Both Gmail connectors are connected!"
 - If only one works: Explain which one is missing and why they need it
-  - "The draft connector isn't connected. Without it, I can research accounts and generate emails, but I won't be able to put them in your Gmail drafts. Let me walk you through connecting it..."
 - If neither works: Walk through connecting both, one at a time
 
 **Slack:**
-> Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run outreach on a company, the plugin sends a message to the `#ozzy` Slack channel that mentions `<@U0AFG7T5ALQ>` (the Ozzy bot) to trigger it. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel. The plugin reads those results right from Slack.
+> Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run research on a company, the plugin can send a message to the `#ozzy` Slack channel to trigger Ozzy. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel.
 >
 > Let me check if Slack is connected...
 
 - Try a lightweight Slack call (e.g., `slack_search_channels` with query "ozzy")
-- If it works: "✓ Slack is connected! I can see the #ozzy channel."
+- If it works: "Slack is connected! I can see the #ozzy channel."
 - If it fails: Same guided flow — walk them through Settings → Connectors → Slack → Connect
-  - "Slack isn't connected yet. Go to **Settings** (gear icon) → **Connectors** → find **Slack** → click **Connect**"
-  - "Sign in with your HqO Slack workspace credentials and grant the permissions it asks for"
-  - "Come back here and tell me when you're done — I'll check again"
-  - Wait for them to confirm, then re-test
 
 After verifying Slack is connected, confirm access to the `#ozzy` channel:
 - Try `slack_read_channel` with channel_id `C0AEK5BFHSA` and limit `1`
-- If it works: "✓ I can read the #ozzy channel — Ozzy is ready to go."
+- If it works: "I can read the #ozzy channel — Ozzy is ready to go."
 - If it fails: "I can't access the #ozzy channel. You may need to join it first — search for `#ozzy` in Slack and click Join. Let me know when you're in."
 
 After all connectors are checked:
@@ -97,40 +120,53 @@ First, check `config/settings.json` → `bdr.signature_html`.
 
 Skip this phase entirely. Just note:
 
-> ✓ **Signature already configured** — your drafts will include your email signature. (Run `/hqo:setup` anytime to update it.)
+> **Signature already configured** — your drafts will include your email signature. (Run `/hqo:onboard` anytime to update it.)
 
 Move on to Phase 4.
 
 **If `signature_html` is empty or missing:**
 
-> When I create email drafts for you, I need to include your signature directly in the draft body. The Gmail connector can't pull your signature automatically, so I need the HTML for your HqO-branded signature.
+> When I create email drafts for you, I need to include your signature directly in the draft body. I can pull it automatically from one of your sent emails.
 >
-> This way, every draft I put in your inbox is ready to send — signature and all.
+> First, I need you to send yourself a quick email so I can grab the signature:
 >
-> The easiest way to get this is from your Gmail settings. Here's how:
+> 1. Open **Gmail** and compose a new email **to yourself**
+> 2. Set the subject to: **bdr toolkit**
+> 3. Type anything in the body — just make sure your signature is included
+> 4. **Send it**
+> 5. Tell me when it's sent
+
+**After the BDR confirms they sent the email:**
+
+Extract the signature automatically using the Gmail API:
+
+1. Search sent emails for the signature source:
+   - Use `gmail:fetch_emails` with `query="subject:bdr toolkit"`, `label_ids=["SENT"]`, `include_payload=true`, `max_results=5`
+2. Get the message ID from the results
+3. Fetch the full message:
+   - Use `gmail:fetch_message_by_message_id` with the message ID and `format="full"`
+4. Extract the HTML content:
+   - Navigate the message payload parts to find the `text/html` MIME part
+   - The HTML body is base64url-encoded in `part.body.data`
+   - Decode it (base64url with `===` padding for safety)
+5. Isolate the signature:
+   - Look for the Gmail signature wrapper: `<div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">`
+   - Extract everything from `<span class="gmail_signature_prefix">` through the closing signature `</div>` tags
+   - The signature prefix (`-- `) and the signature div together form the complete signature block
+   - HqO signatures typically use nested `<table>` elements with social icons, contact info rows, and a disclaimer table
+
+6. Save the extracted HTML to `config/settings.json` under `bdr.signature_html`
+7. Confirm to the BDR:
+
+> **Signature extracted and saved!** Here's a preview of what it'll look like in your drafts:
 >
-> 1. Open **Gmail** in your browser (mail.google.com)
-> 2. Click the **gear icon** (top right) → **See all settings**
-> 3. Scroll down to the **Signature** section
-> 4. Click inside the signature editor box where your signature is displayed
-> 5. **Select all** the signature content (Cmd+A / Ctrl+A)
-> 6. **Copy** it (Cmd+C / Ctrl+C)
-> 7. Now open a new **Google Doc** (docs.google.com) or any text editor
-> 8. **Paste** the signature there (Cmd+V / Ctrl+V) — this preserves the formatting
-> 9. In that Google Doc, go to **File → Download → Web Page (.html, zipped)**
-> 10. Open the downloaded `.zip`, find the `.html` file inside
-> 11. **Right-click** the `.html` file → **Open with** a text editor (TextEdit on Mac, Notepad on Windows) — NOT a browser
-> 12. **Select all** (Cmd+A / Ctrl+A), **copy** (Cmd+C / Ctrl+C), and **paste it here**
+> [render a plain-text representation of the signature for them to verify]
 >
-> I know that's a few steps — but you only need to do this once.
+> Every email draft I create will include this signature at the bottom. If you ever need to update it, run `/hqo:onboard`.
 
-If the BDR says they have an `.html` file already (from their manager or GTM Engineering), take the shortcut:
+**If extraction fails** (no signature found in the email, no HTML part, etc.):
 
-> Perfect — just **right-click** the `.html` file → **Open with** a text editor (NOT a browser), **select all**, **copy**, and **paste it here**.
-
-If the BDR has no signature at all:
-
-> No problem — let's create one. Tell me your full name, title, phone number, and HqO email, and I'll generate one for you.
+> I couldn't find a signature in that email. Let's try another way — tell me your full name, title, phone number, and HqO email, and I'll generate one for you.
 
 When they provide the details, generate a simple, professional HTML signature block:
 
@@ -143,18 +179,7 @@ When they provide the details, generate a simple, professional HTML signature bl
 </table>
 ```
 
-Show the generated HTML to the BDR and ask if it looks right. Offer to adjust.
-
-**After receiving the signature HTML:**
-
-1. Save the raw HTML string to `config/settings.json` under `bdr.signature_html`
-2. Confirm to the BDR:
-
-> ✓ **Signature saved!** Here's a preview of what it'll look like in your drafts:
->
-> [render a plain-text representation of the signature for them to verify]
->
-> Every email draft I create will include this signature at the bottom. If you ever need to update it, run `/hqo:setup`.
+Show the generated HTML to the BDR and ask if it looks right. Offer to adjust. Save to `config/settings.json` under `bdr.signature_html`.
 
 Wait for confirmation before moving on.
 
@@ -166,13 +191,10 @@ Ask these one at a time, waiting for each answer:
 
 1. "What's your first name?"
 2. "What's your HqO email address?"
-3. "What's your LinkedIn profile URL?" (e.g., `https://linkedin.com/in/yourname`)
-4. Ask tone preference using a multiple-choice question:
+3. Ask tone preference using a multiple-choice question:
    - **Professional** (recommended) — polished and direct
    - **Casual** — conversational and warm
    - **Consultative** — advisory and insight-led
-
-The LinkedIn URL is used when requesting deep research from Ozzy — it tells the research bot who's requesting, so it can tailor people intel to your network and context.
 
 Save answers to `config/settings.json` (the `signature_html` field was already saved in Phase 3):
 ```json
@@ -181,14 +203,13 @@ Save answers to `config/settings.json` (the `signature_html` field was already s
     "name": "[their name]",
     "email": "[their email]",
     "tone": "[their choice]",
-    "linkedin_url": "[their LinkedIn URL]",
     "signature_html": "[already saved from Phase 3]"
   }
 }
 ```
 
 Confirm:
-> Got it — you're saved as **[Name]** ([email]), tone set to **[tone]**, LinkedIn connected.
+> Got it — you're saved as **[Name]** ([email]), tone set to **[tone]**.
 
 ### Phase 5: Test Run
 
@@ -204,18 +225,16 @@ After results come in, walk them through the output:
 >
 > **ICP Score** — Rates how well the company fits our ideal customer profile, based on portfolio size and deal potential. This comes from **Clay** (company enrichment) and **HubSpot** (CRM data).
 >
-> **Deep Research Insights** — If deep research is enabled, the plugin sends a message to the **#ozzy Slack channel** mentioning `<@U0AFG7T5ALQ>` (the Ozzy bot) to trigger autonomous web research. Ozzy crawls company websites, press releases, SEC filings, LinkedIn profiles, and conference speaker lists. After about a minute, Ozzy posts back structured results — portfolio verification, ICP validation, and people intel — which the plugin reads directly from Slack. This goes far beyond what Clay or HubSpot provide.
+> **Company Overview** — Background pulled from **Clay** and **HubSpot**.
 >
-> **Company Overview** — Background pulled from **Clay** and **HubSpot**, enriched with Ozzy's findings when available.
->
-> **Key Contacts** — People at the company mapped by priority using **Clay** (contact discovery) and **HubSpot** (existing records). Asset Managers and executives come first because they're our primary buyers. When Ozzy runs, it also surfaces LinkedIn activity, press mentions, and conference appearances for top contacts — these become personalized email openers. If Clay finds contacts that aren't in HubSpot yet, the plugin will ask if you want to add them to the CRM — that way the whole team can see them.
+> **Key Contacts** — People at the company mapped by priority using **Clay** (contact discovery) and **HubSpot** (existing records). Asset Managers and executives come first because they're our primary buyers. If Clay finds contacts that aren't in HubSpot yet, the plugin will ask if you want to add them to the CRM.
 >
 > **Customer Parallels** — Existing HqO customers in the same market, pulled from **HubSpot**, that we can reference in outreach.
 >
 > **Engagement Status** — Shows if anyone on the team has already reached out to these contacts, from **HubSpot** engagement history.
 
 Then:
-> That's the research side. When you're ready to actually generate outreach emails, you'd run `/hqo:outreach [company]` — same thing but with personalized emails at the end. Then `/hqo:push-drafts` to put them in your Gmail.
+> That's the research side. When you're ready to generate emails for these contacts, just tell me. Then run `/hqo:draft-emails` to put them in your Gmail.
 
 ### Phase 6: Wrap-up
 
@@ -225,10 +244,9 @@ Then:
 >
 > | Command | What It Does |
 > |---------|-------------|
-> | `/hqo:outreach [company]` | Full workflow — research + emails |
-> | `/hqo:research [company]` | Research only, no emails |
-> | `/hqo:push-drafts` | Create Gmail drafts from generated emails |
-> | `/hqo:setup` | Update your name, email, or tone preference |
+> | `/hqo:research [company]` | Research an account, score ICP, map contacts, generate emails |
+> | `/hqo:draft-emails` | Create Gmail drafts from generated emails |
+> | `/hqo:onboard` | Update your name, email, tone, or signature |
 >
 > **What's working behind the scenes:**
 >
@@ -236,10 +254,10 @@ Then:
 > |------|-------------|
 > | **HubSpot** | CRM lookups — company records, contacts, engagement history |
 > | **Clay** | Company enrichment — portfolio size, markets, news, additional contacts |
-> | **Ozzy (via Slack)** | Deep web research — mentions `<@U0AFG7T5ALQ>` in `#ozzy` channel to trigger the bot, gets back verified portfolio data, ICP validation, and people intel (LinkedIn, press, conferences) |
+> | **Ozzy (via Slack)** | Deep web research — triggered on request for verified portfolio data, ICP validation, and people intel |
 > | **Gmail** | Creates draft emails directly in your inbox for review before sending |
 >
-> Start with `/hqo:outreach [company]` whenever you're ready to prospect a new account. The plugin handles the rest — pulling data from HubSpot and Clay, calling Ozzy for deep research via Slack, then generating personalized emails and putting them in your Gmail drafts.
+> Start with `/hqo:research [company]` whenever you're ready to prospect a new account.
 >
 > Any questions?
 
@@ -251,7 +269,8 @@ Then:
 
 ## Important Rules
 
-- NEVER skip the connector checks (HubSpot, Clay, Gmail, Slack). A missing connector will break the workflow later and the BDR won't know why.
+- NEVER skip the connector checks (HubSpot, Clay, Gmail, Slack) on first-time setup. A missing connector will break the workflow later and the BDR won't know why.
 - NEVER assume connectors are working — always test them with an actual call.
 - ALWAYS wait for the BDR's response before moving to the next phase. This is a conversation, not a monologue.
 - Keep each message focused on ONE thing. Don't dump a wall of text.
+- Deep research config is managed by GTM Engineering, not BDRs.

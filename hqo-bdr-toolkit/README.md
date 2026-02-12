@@ -5,11 +5,10 @@ Cowork plugin for HqO BDR prospecting — research target accounts, generate per
 ## What It Does
 
 1. **Research** — Enriches target companies via Clay + HubSpot (portfolio size, markets, contacts, news)
-2. **Score** — Calculates ICP fit and deal size tier
-3. **Deep Research** — Mentions `<@U0AFG7T5ALQ>` (the Ozzy bot) in the `#ozzy` Slack channel to trigger autonomous web research. Ozzy validates ICP, verifies portfolio details, and surfaces people intel (LinkedIn, press, conferences) for key contacts. Results are read back from Slack automatically.
-4. **Map** — Discovers and validates contacts by persona priority, enriched with Ozzy's people intel
-5. **Write** — Generates Challenger-method emails with customer proof points and contact-specific openers
-6. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
+2. **Score** — Ozzy handles ICP scoring, portfolio verification, key champions, and sales angle development automatically
+3. **Map** — Discovers and validates contacts by persona priority, enriched with Ozzy's key champion intel
+4. **Write** — Generates Challenger-method emails using Ozzy's sales angle and contact-specific openers
+5. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
 
 ## Getting Started
 
@@ -26,18 +25,16 @@ That's it. The onboard command walks you through everything — connector setup,
 Jump straight to prospecting:
 
 ```
-/hqo:outreach Brookfield Properties
+/hqo:research Brookfield Properties
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/hqo:onboard` | **Start here** — guided setup + test run |
-| `/hqo:outreach [company]` | Full workflow: research → score → contacts → emails |
-| `/hqo:research [company]` | Research only, no email generation |
-| `/hqo:push-drafts` | Save draft file for review, then create Gmail drafts |
-| `/hqo:setup` | Quick reconfigure (name, email, tone) without full onboarding |
+| `/hqo:onboard` | **Start here** — guided setup, test run, and settings updates |
+| `/hqo:research [company]` | Full workflow: research → score → contacts → emails |
+| `/hqo:draft-emails` | Save draft file for review, then create Gmail drafts |
 
 ## Prerequisites
 
@@ -48,7 +45,7 @@ Jump straight to prospecting:
 |-----------|---------|----------|
 | HubSpot | CRM lookup, contact mapping, engagement history | Yes |
 | Clay | Company enrichment, contact discovery, news/triggers | Yes |
-| Slack | Deep research via Ozzy (`<@U0AFG7T5ALQ>` mention in `#ozzy` channel) + reading results | Yes |
+| Slack | Ozzy research tool (ICP scoring, portfolio data, key champions, sales angles) | Yes |
 | Google Gmail | Read and search your inbox | Yes |
 | Gmail | Create drafts directly in your inbox | Yes |
 | ZoomInfo | Supplemental contact enrichment | Optional |
@@ -61,11 +58,9 @@ hqo-bdr-outreach/
 ├── .mcp.json                         # MCP connector config
 ├── config/settings.json              # BDR personalization + deep research config
 ├── commands/
-│   ├── onboard.md                    # /hqo:onboard (start here)
-│   ├── setup.md                      # /hqo:setup
-│   ├── outreach.md                   # /hqo:outreach
-│   ├── research.md                   # /hqo:research
-│   └── push-drafts.md               # /hqo:push-drafts
+│   ├── onboard.md                    # /hqo:onboard (setup + settings)
+│   ├── research.md                   # /hqo:research (full workflow)
+│   └── draft-emails.md              # /hqo:draft-emails
 ├── skills/
 │   ├── prospecting/
 │   │   ├── SKILL.md                  # Core prospecting knowledge
@@ -73,7 +68,7 @@ hqo-bdr-outreach/
 │   │       ├── icp-criteria.md       # ICP definition & tiering
 │   │       └── customer-references.md # Customer proof point rules
 │   ├── deep-research/
-│   │   ├── SKILL.md                  # Ozzy deep research integration
+│   │   ├── SKILL.md                  # Ozzy research tool (ICP, portfolio, champions)
 │   │   └── references/
 │   │       ├── ozzy-response-schema.md       # Response field docs
 │   │       └── research-to-workflow-mapping.md # Field → workflow mapping
@@ -88,6 +83,6 @@ hqo-bdr-outreach/
 
 ## How It's Different From the Old Approach
 
-The previous Claude Projects setup loaded a 500-line instruction set every conversation, hitting token limits and rate caps. This plugin uses on-demand skill loading — only the relevant files load when a command runs. Research loads prospecting knowledge; outreach adds email generation on top. References only load when the parent skill needs them.
+The previous Claude Projects setup loaded a 500-line instruction set every conversation, hitting token limits and rate caps. This plugin uses on-demand skill loading — only the relevant files load when a command runs. References only load when the parent skill needs them.
 
 No external tools to configure. Everything flows through Cowork's built-in MCP connectors (HubSpot, Clay, Slack, Gmail) that the BDR already has enabled.

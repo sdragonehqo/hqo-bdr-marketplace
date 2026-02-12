@@ -1,16 +1,16 @@
 ---
-name: push-drafts
-description: Create Gmail drafts directly from generated outreach emails using the Gmail connector. Run after /hqo:outreach has generated emails.
+name: draft-emails
+description: Create Gmail drafts directly from generated outreach emails using the Gmail connector. Run after /hqo:research has generated emails.
 arguments: []
 ---
 
-# /hqo:push-drafts
+# /hqo:draft-emails
 
 Create Gmail drafts for all generated emails using Cowork's built-in Gmail connector. No external tools or API keys needed.
 
 ## Prerequisites
 
-- Emails must have been generated in this session (via `/hqo:outreach`)
+- Emails must have been generated in this session (via `/hqo:research`)
 - BDR identity (name, email) must be confirmed
 - Gmail connector must be enabled in Cowork
 - BDR signature HTML should be saved in `config/settings.json` → `bdr.signature_html` (set during `/hqo:onboard`)
@@ -35,7 +35,7 @@ Create Gmail drafts for all generated emails using Cowork's built-in Gmail conne
    - `body`: assembled HTML body (see Signature Assembly below)
    - `is_html`: `true` (when signature is present)
    - Do NOT send — drafts only
-   - Report each draft as it's created (e.g., "✓ Draft 1/8: Claire Outram — created")
+   - Report each draft as it's created (e.g., "Draft 1/8: Claire Outram — created")
 6. **Confirm** — Report final results to BDR in chat:
    - Count of drafts created
    - List any skipped contacts with reasons
@@ -53,11 +53,11 @@ For each draft, assemble the final `body` at creation time:
    - Set `is_html: true` on the `create_email_draft` call
 4. If `signature_html` is empty:
    - Send as plain text (`is_html: false`) — no signature block
-   - Warn the BDR: "No signature configured — drafts won't include a signature. Run `/hqo:setup` to add one."
+   - Warn the BDR: "No signature configured — drafts won't include a signature. Run `/hqo:onboard` to add one."
 
 ## Error Handling
 
-- No emails generated → "Run `/hqo:outreach [company]` first"
+- No emails generated → "Run `/hqo:research [company]` first to generate emails"
 - Gmail connector not enabled → "Enable the Gmail connector in Cowork settings"
 - Single draft fails → Log the error, continue with remaining drafts, report failures at end
 - All drafts fail → Check Gmail connector permissions, suggest reconnecting

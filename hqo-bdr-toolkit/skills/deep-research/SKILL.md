@@ -1,21 +1,23 @@
 ---
 name: hqo-deep-research
-description: Deep autonomous web research on target companies and contacts via Ozzy (OpenClaw agent). Runs after initial ICP scoring to validate fit, enrich portfolio details, and surface people intel for Tier 1+2 contacts. Auto-triggers as step 2b in the prospecting workflow.
+description: ICP research and company intelligence via Ozzy (OpenClaw agent). Ozzy is Claude's research tool — it handles ICP scoring, portfolio verification, people intel, and sales angle development so Claude doesn't duplicate that work. Runs automatically on every /hqo:research command.
 ---
 
 # Deep Research (Ozzy)
 
+## Output Rules
+
+**Do NOT print internal reasoning, `<thinking>` tags, tool-call rationale, or decision-tree logic in the chat.** Only show the BDR the structured Research Results output. All internal processing (Slack calls, JSON parsing, field mapping) stays behind the scenes.
+
 ## Purpose
 
-Ozzy is an autonomous research agent that crawls the web — company websites, press releases, SEC filings, LinkedIn profiles, conference speaker lists, industry publications — to build a deep company and people profile. This goes far beyond what Clay or HubSpot provide.
+Ozzy is Claude's research tool. Instead of Claude doing its own ICP scoring and company analysis, Ozzy handles it — crawling the web (company websites, press releases, SEC filings, LinkedIn profiles, conference speaker lists, industry publications) to build a comprehensive company and people profile with ICP scoring, portfolio verification, key champions, and a recommended sales angle.
 
-Deep research runs **after** Step 2 (ICP Scoring) and **before** Step 3 (Contact Mapping). It validates the initial ICP determination and enriches everything downstream.
+**Ozzy runs automatically on every `/hqo:research` command.** Claude uses Ozzy's output directly for ICP scoring, contact prioritization, and email personalization. There is no separate "Claude ICP scoring" step — Ozzy IS the ICP scoring step.
 
-## When to Use
+## When It Runs
 
-- After Steps 1–2 of the prospecting workflow have completed (need company_name, domain, hubspot_id)
-- When `config/settings.json` has `deep_research.enabled = true`
-- If the wrapper is unreachable, skip gracefully and continue with Clay+HubSpot data
+Ozzy runs as **Step 2** of the `/hqo:research` workflow, immediately after Company Identification. It is NOT optional — it runs every time. The BDR does not need to request it.
 
 ## Calling Ozzy
 
@@ -35,9 +37,9 @@ Look through the search results for a message from the Ozzy bot (user ID: `deep_
 
 **If a matching response is found:**
 - Parse the JSON from the existing message
-- **Tell the BDR:** "Found existing deep research for [company] — using cached results from [clay_last_enriched date]."
+- **Tell the BDR:** "Found existing research for [company] from [clay_last_enriched date]."
 - Skip directly to **Step 5: Push to HubSpot** (the data may not have been pushed previously, or may need refreshing)
-- Then continue to **Handling the Response**
+- Then continue to **Using the Results**
 
 **If no matching response is found:**
 - Continue to Step 2 to trigger a fresh Ozzy run
@@ -47,18 +49,16 @@ Look through the search results for a message from the Ozzy bot (user ID: `deep_
 Send a message to the `#ozzy` Slack channel using the Slack MCP `slack_send_message` tool:
 
 - **channel_id:** Use `deep_research.slack_channel_id` from settings
-- **message:** Format as: `<@U0AFG7T5ALQ> ICP:{hubspot_id},{domain},{company_name},{requester_linkedin_url}`
+- **message:** Format as: `<@U0AFG7T5ALQ> ICP:{hubspot_id},{domain},{company_name}`
 
 The `<@U0AFG7T5ALQ>` is the Slack user mention tag for the Ozzy bot — this is what actually pings the bot and triggers research. Plain text `@Ozzy` does NOT work. Always use the `<@...>` format.
 
-The `requester_linkedin_url` comes from `config/settings.json` → `bdr.linkedin_url`. This tells Ozzy who is requesting the research so it can tailor people intel to the requester's network and context.
-
 Example:
 ```
-<@U0AFG7T5ALQ> ICP:61514582769,gcomfort.com,George Comfort & Sons,https://linkedin.com/in/adam-rodriguez
+<@U0AFG7T5ALQ> ICP:61514582769,gcomfort.com,George Comfort & Sons
 ```
 
-**Tell the BDR:** "Running deep research on [company] — Ozzy is crawling the web for detailed portfolio and people intel. This takes about a minute..."
+**Tell the BDR:** "Running research on [company] — Ozzy is gathering portfolio data, ICP scoring, key champions, and sales angles. This takes about a minute..."
 
 ### Step 3: Wait for Response
 
@@ -71,7 +71,7 @@ Read the `#ozzy` channel using the Slack MCP `slack_read_channel` tool:
 - **channel_id:** Same channel ID from settings
 - **limit:** 10 (to capture Ozzy's full response — Ozzy may post multiple messages)
 
-Look for messages from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`). The structured JSON response will be in a code block (``` delimited) containing all `clay_*` fields matching the schema in `references/ozzy-response-schema.md`.
+Look for messages from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`). The structured JSON response will be in a code block (``` delimited) containing all fields matching the schema in `references/ozzy-response-schema.md`.
 
 ### Parsing the Response
 
@@ -85,11 +85,11 @@ If Ozzy posts multiple messages (narrative + JSON), use the one with the structu
 
 After successfully parsing Ozzy's JSON response, present the results to the BDR for review before pushing to HubSpot.
 
-**Present the results first.** Show the BDR a summary of what Ozzy found — use the Deep Research Insights output format (see Output Section below). Let them review the ICP determination, portfolio data, and recommended action.
+**Present the results first.** Show the BDR a summary of what Ozzy found — use the output format from the Output Section below. Let them review the ICP scoring, portfolio data, key champions, and recommended sales angle.
 
 **Then ask for approval to push:**
 
-> "Ready to push these deep research findings to the HubSpot record for [company]? This updates the `clay_*` fields on the company record so the team can see them."
+> "Ready to push these findings to the HubSpot record for [company]? This updates the research fields on the company record so the team can see them."
 
 **Only push after the BDR confirms.** Use the HubSpot MCP `manage_crm_objects` tool:
 
@@ -117,6 +117,8 @@ The HubSpot company object has matching properties for every `clay_*` field in t
 | `clay_research_summary` | `clay_research_summary` |
 | `clay_last_enriched` | `clay_last_enriched` |
 
+**NOT pushed to HubSpot (in-session only):** `clay_portfolio_outlook`, `clay_sales_angle`, `clay_recent_news`, `clay_key_champions`, `clay_sources`. These fields are not yet mapped in HubSpot — they are used in-session for contact mapping, email personalization, and BDR context only.
+
 **Rules:**
 - Only push fields that have non-empty values. Skip any field where the value is `""` or `null`.
 - Do NOT push `hubspot_id` — that's the record identifier, not a property to update.
@@ -124,107 +126,101 @@ The HubSpot company object has matching properties for every `clay_*` field in t
 - If the BDR declines the push, continue the workflow — the data is still available in-session.
 - If the HubSpot update fails, log the error and continue the workflow.
 
-**After successful push, tell the BDR:** "Done — Ozzy's findings are now on the HubSpot record for the team."
+**After successful push, tell the BDR:** "Done — research findings are now on the HubSpot record for the team."
 
-## Handling the Response
+## Using the Results
 
-### ICP Validation (Critical)
+Ozzy's output is the **canonical ICP assessment and company intelligence** for the workflow. Claude does not do its own ICP scoring — it uses Ozzy's directly.
 
-Compare Ozzy's `clay_icp` with the initial ICP determination from Step 2:
+### ICP Scoring
 
-**If Ozzy confirms the fit** (both agree the company is a fit):
-- Merge Ozzy's verified portfolio data into the company profile
-- Add `clay_icp_fit_score` and `clay_icp_fit_rating` to output
-- Continue to Step 3
+Ozzy's response IS the ICP scoring step. Use these fields directly:
 
-**If Ozzy says "Not a Fit" but Step 2 said it WAS a fit:**
+- `clay_icp` — The ICP determination (Strong Fit, Moderate Fit, Weak Fit, Not a Fit)
+- `clay_company_tier` — Tier assignment (Tier 1–4, or N/A)
+- `clay_icp_fit_score` — Numeric score (1–10)
+- `clay_estimated_deal_value` — Deal size estimate
+- `clay_recommended_action` — Go/no-go recommendation
+- `clay_icp_reasons_for` / `clay_icp_reasons_against` — Evidence for the BDR
 
-First, check if Ozzy's reasons against mention the company being an **investor, syndicator, capital partner, or not an owner-operator** (look for these signals in `clay_icp_reasons_against` and `clay_research_summary`). If so, trigger the **Owner-Influence Validation** from `references/icp-criteria.md` instead of a hard stop:
+Present these as the ICP scoring results. There is no separate Claude ICP calculation.
 
-- Use the data Ozzy already provided (`clay_portfolio_total_sf`, `clay_portfolio_markets`, `clay_portfolio_asset_classes`, `clay_research_summary`) to run through the 5-step assessment:
-  1. **Ownership stake analysis** — Look for 30%+ equity, lead principal, or direct lease-signing evidence in Ozzy's summary
-  2. **Operating behavior signals** — Check if Ozzy surfaced amenity investments, redevelopment plans, or tenant press releases
-  3. **PM partner mapping** — Identify any property management companies mentioned in Ozzy's research; each is a derivative lead
-  4. **Asset-level filtering** — Separate office-remaining from residential-converting assets; only score the office bucket
-  5. **Influence assessment** — Flag 30%+ equity assets as "owner-influence opportunities"
-- If the company has **3M+ SF of office assets remaining**, score no lower than **5/10** with recommendation **"Evaluate PM Partners"**
-- Present the assessment to the BDR with the owner-influence angle and any PM partner leads identified
-- Continue the workflow with the adjusted score — this is NOT a hard stop
+### Portfolio Data
 
-If the reasons against are **not** investor/operator-related (e.g., wrong industry, no CRE portfolio, etc.), then hard stop:
+Ozzy provides verified portfolio intel:
 
-- **STOP the workflow immediately**
-- Present BOTH assessments to the BDR:
-  - "Initial research (Clay+HubSpot) suggested [Tier X] fit because [reasons]"
-  - "Deep research (Ozzy) says NOT a fit because: [clay_icp_reasons_against]"
-  - "Recommended action: [clay_recommended_action]"
-  - "Data gaps: [clay_icp_data_gaps]"
-- Ask: "Do you want to continue with outreach anyway, or skip this company?"
-- Only proceed if BDR explicitly confirms
+- `clay_portfolio_total_sf` — Verified square footage
+- `clay_portfolio_num_buildings` — Property count
+- `clay_portfolio_markets` — Market list (use for customer parallel matching)
+- `clay_portfolio_asset_classes` — Asset classes (use for customer reference matching)
+- `clay_portfolio_outlook` — Recent acquisitions, divestitures, capital programs
+- `clay_recent_news` — News and triggers from the last 12 months
 
-**If Ozzy says fit but with a different tier than Step 2:**
-- Present both tiers with reasoning
-- Use the more conservative (lower) tier unless BDR overrides
+### Key Champions
 
-### Portfolio Enrichment
+`clay_key_champions` is an array of high-value contacts Ozzy identified through web research. Each entry includes:
 
-When Ozzy returns portfolio data, it takes priority over Clay's estimates:
+- `name` — Contact name
+- `title` — Current title
+- `linkedin` — LinkedIn profile URL
+- `insights` — What Ozzy found (quotes, conference appearances, articles, role context)
+- `source_url` — Source for the intel
 
-- `clay_portfolio_total_sf` — Use for deal size recalculation if significantly different from Clay's
-- `clay_portfolio_num_buildings` — Use in email personalization ("across your 147 properties")
-- `clay_portfolio_markets` — Use for customer parallel matching (more accurate than Clay)
-- `clay_portfolio_asset_classes` — Use for customer reference matching (verified > inferred)
+**Use key champions for:**
+- Enriching the Contact Mapping step — add Ozzy's intel to matching contacts
+- Email personalization — quotes, conference mentions, and article references make far better openers than generic portfolio references
+- Prioritization — contacts Ozzy surfaced with strong insights should be prioritized
 
-### People Intel
+### Sales Angle
 
-Ozzy researches **Tier 1 + Tier 2 contacts only**:
-- **Tier 1:** Asset Manager, SVP/Head of Portfolio, MD, Executives
-- **Tier 2:** Property Manager, Regional Director, Experience Manager
+`clay_sales_angle` is Ozzy's recommended approach for the account. Use it as the foundation for email generation — it identifies which champions to lead with, which triggers to reference, and how to frame HqO's value prop for this specific company.
 
-For each contact, Ozzy may surface:
-- LinkedIn activity (recent posts, profile changes)
-- Press mentions (quotes, interviews)
-- Conference appearances (speaking, panels)
-- Published articles (authored pieces, thought leadership)
-- Role tenure and transitions
+### Sources
 
-This intel feeds directly into email personalization in Step 5. See `references/research-to-workflow-mapping.md` for the full mapping.
+`clay_sources` is an array of everything Ozzy found during research. Each entry includes type, title, URL, date, and key info. Use these for:
+- Verifying claims before including in emails
+- Providing the BDR context on where intel came from
+- Reference material if the BDR wants to dig deeper
 
 ## Error Handling
 
 | Scenario | Action |
 |----------|--------|
-| Cache check finds existing research (Step 1) | Use cached results. Skip Ozzy request + wait. Still push to HubSpot (Step 5) and continue to Handling the Response. |
+| Cache check finds existing research (Step 1) | Use cached results. Skip Ozzy request + wait. Still push to HubSpot (Step 5) and continue. |
 | Cache check search fails | Treat as cache miss — proceed to Step 2 and trigger a fresh Ozzy run. |
-| Slack send fails or Ozzy bot is offline | Log "Deep research unavailable — continuing with Clay+HubSpot data." Continue workflow. |
-| No response from Ozzy in `#ozzy` after `max_wait_seconds` | Read channel one more time. If still no response, continue workflow without deep research. |
+| Slack send fails or Ozzy bot is offline | Log "Research tool unavailable — falling back to Clay + HubSpot data." Continue workflow with Clay data only. Claude performs basic ICP scoring using `portfolio_sf × $0.04/sf` from Clay enrichment. |
+| No response from Ozzy after `max_wait_seconds` | Read channel one more time. If still no response, fall back to Clay + HubSpot. |
 | Response missing fields | Use whatever fields are present. Missing fields = use Clay/HubSpot data for those. |
-| `clay_icp` = "Not a Fit" | **Hard stop.** Present conflict. Require BDR confirmation. See ICP Validation above. |
 | Multiple responses for same `hubspot_id` | Use the most recent matching message (closest to current time). |
-| HubSpot update fails after successful Ozzy response | Log the error. Deep research data is still available in-session — continue the workflow. Note in output: "Could not sync deep research to HubSpot." |
+| HubSpot update fails | Log the error. Research data is still available in-session — continue the workflow. |
 
 ## Graceful Degradation
 
-Deep research is **additive**. If it fails for any reason:
-- Steps 3–6 proceed exactly as they would without deep research
-- Output sections still render, just without the "Deep Research Insights" subsection
-- Email personalization falls back to Clay+HubSpot data (existing behavior)
-- Note in output: "Deep research was unavailable for this run"
+If Ozzy is unavailable (offline, timeout, Slack error):
+- Claude falls back to Clay + HubSpot data for ICP scoring
+- Uses the formula `portfolio_sf × $0.04/sf` from Clay enrichment for deal sizing
+- Assigns tier per `references/icp-criteria.md`
+- Workflow continues without key champions, sales angle, or verified portfolio data
+- Tell the BDR: "Ozzy is unavailable — using Clay + HubSpot data for this research."
 
 ## Output Section
 
-When deep research completes successfully, add this section to the output **after ICP Match Rating**:
+When Ozzy's research completes successfully, present this to the BDR:
 
-### Deep Research Insights
+### Research Results
 
-- **Confidence Score:** [clay_icp_fit_score]/10 — [clay_icp_fit_rating]
+- **ICP Rating:** [clay_icp] — [clay_company_tier]
+- **Confidence Score:** [clay_icp_fit_score]/10
+- **Estimated Deal Value:** [clay_estimated_deal_value]
+- **Recommended Action:** [clay_recommended_action]
 - **Reasons For:** [clay_icp_reasons_for]
 - **Reasons Against:** [clay_icp_reasons_against]
 - **Data Gaps:** [clay_icp_data_gaps]
-- **Verified Portfolio:** [clay_portfolio_num_buildings] properties, [clay_portfolio_total_sf] sf across [clay_portfolio_markets]
+- **Portfolio:** [clay_portfolio_num_buildings] properties, [clay_portfolio_total_sf] sf across [clay_portfolio_markets]
 - **Asset Classes:** [clay_portfolio_asset_classes]
-- **Estimated Deal Value:** [clay_estimated_deal_value]
-- **Recommended Action:** [clay_recommended_action]
+- **Portfolio Outlook:** [clay_portfolio_outlook]
+- **Recent News:** [clay_recent_news]
+- **Key Champions:** [name, title, and key insight for each entry in clay_key_champions]
+- **Sales Angle:** [clay_sales_angle]
 - **Summary:** [clay_research_summary]
-- **People Intel:** [per-contact findings for Tier 1+2, if available]
 - **Research Date:** [clay_last_enriched]

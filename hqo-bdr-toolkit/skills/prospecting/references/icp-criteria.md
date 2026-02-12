@@ -1,5 +1,7 @@
 # ICP Criteria & Tiering
 
+> **Note:** Ozzy handles ICP scoring automatically as Step 2 of the workflow. This file is reference material used as a **fallback** when Ozzy is unavailable — Claude uses these criteria to do basic ICP scoring with Clay + HubSpot data.
+
 ## Target Segments
 
 Owner-operators, third-party property managers, institutional capital/investors.
