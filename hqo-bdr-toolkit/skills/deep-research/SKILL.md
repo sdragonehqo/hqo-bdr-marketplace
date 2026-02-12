@@ -129,6 +129,21 @@ Compare Ozzy's `clay_icp` with the initial ICP determination from Step 2:
 - Continue to Step 3
 
 **If Ozzy says "Not a Fit" but Step 2 said it WAS a fit:**
+
+First, check if Ozzy's reasons against mention the company being an **investor, syndicator, capital partner, or not an owner-operator** (look for these signals in `clay_icp_reasons_against` and `clay_research_summary`). If so, trigger the **Owner-Influence Validation** from `references/icp-criteria.md` instead of a hard stop:
+
+- Use the data Ozzy already provided (`clay_portfolio_total_sf`, `clay_portfolio_markets`, `clay_portfolio_asset_classes`, `clay_research_summary`) to run through the 5-step assessment:
+  1. **Ownership stake analysis** — Look for 30%+ equity, lead principal, or direct lease-signing evidence in Ozzy's summary
+  2. **Operating behavior signals** — Check if Ozzy surfaced amenity investments, redevelopment plans, or tenant press releases
+  3. **PM partner mapping** — Identify any property management companies mentioned in Ozzy's research; each is a derivative lead
+  4. **Asset-level filtering** — Separate office-remaining from residential-converting assets; only score the office bucket
+  5. **Influence assessment** — Flag 30%+ equity assets as "owner-influence opportunities"
+- If the company has **3M+ SF of office assets remaining**, score no lower than **5/10** with recommendation **"Evaluate PM Partners"**
+- Present the assessment to the BDR with the owner-influence angle and any PM partner leads identified
+- Continue the workflow with the adjusted score — this is NOT a hard stop
+
+If the reasons against are **not** investor/operator-related (e.g., wrong industry, no CRE portfolio, etc.), then hard stop:
+
 - **STOP the workflow immediately**
 - Present BOTH assessments to the BDR:
   - "Initial research (Clay+HubSpot) suggested [Tier X] fit because [reasons]"
