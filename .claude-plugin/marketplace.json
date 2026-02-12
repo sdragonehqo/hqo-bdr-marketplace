@@ -9,7 +9,7 @@
     {
       "name": "hqo-bdr-toolkit",
       "source": "./hqo-bdr-toolkit",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "description": "Research accounts, generate personalized outreach, and create Gmail drafts — all from Cowork. 2.3.0 UPDATE: email signature onboarding function."
     }
   ]

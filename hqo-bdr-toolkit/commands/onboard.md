@@ -89,28 +89,25 @@ After verifying Slack is connected, confirm access to the `#ozzy` channel:
 After all connectors are checked:
 > **All connectors are set!** That's the hardest part done. Now let's make sure your emails will look professional.
 
-### Phase 3: Email Signature Setup
+### Phase 3: Email Signature Check
+
+First, check `config/settings.json` → `bdr.signature_html`.
+
+**If `signature_html` is already populated (non-empty):**
+
+Skip this phase entirely. Just note:
+
+> ✓ **Signature already configured** — your drafts will include your email signature. (Run `/hqo:setup` anytime to update it.)
+
+Move on to Phase 4.
+
+**If `signature_html` is empty or missing:**
 
 > When I create email drafts for you, I need to include your signature directly in the draft body. The Gmail connector can't pull your signature automatically, so I need the HTML for your HqO-branded signature.
 >
 > This way, every draft I put in your inbox is ready to send — signature and all.
-
-Walk the BDR through getting their signature HTML. There are two paths:
-
-**Path A: They have an HTML signature file from their manager or GTM Engineering**
-
-> If your manager or GTM Engineering gave you a `.html` signature file, that's the easiest path. Here's how to get me the HTML:
 >
-> 1. Find the `.html` file on your computer (check Downloads, Desktop, or your email for it)
-> 2. **Right-click** the file → **Open with** → choose a **text editor** (TextEdit on Mac, Notepad on Windows) — NOT a browser
-> 3. You'll see the raw HTML code — it'll look like `<table>` tags and `<td>` tags with your name, title, etc.
-> 4. **Select all** (Cmd+A / Ctrl+A), **copy** (Cmd+C / Ctrl+C), and **paste it here** in our chat
->
-> I'll save it to your config so every draft includes your signature automatically.
-
-**Path B: They don't have an HTML file but have a signature set up in Gmail already**
-
-> No worries — we can grab it from Gmail. Here's how:
+> The easiest way to get this is from your Gmail settings. Here's how:
 >
 > 1. Open **Gmail** in your browser (mail.google.com)
 > 2. Click the **gear icon** (top right) → **See all settings**
@@ -122,20 +119,18 @@ Walk the BDR through getting their signature HTML. There are two paths:
 > 8. **Paste** the signature there (Cmd+V / Ctrl+V) — this preserves the formatting
 > 9. In that Google Doc, go to **File → Download → Web Page (.html, zipped)**
 > 10. Open the downloaded `.zip`, find the `.html` file inside
-> 11. **Right-click** the `.html` file → **Open with** a text editor (NOT a browser)
+> 11. **Right-click** the `.html` file → **Open with** a text editor (TextEdit on Mac, Notepad on Windows) — NOT a browser
 > 12. **Select all** (Cmd+A / Ctrl+A), **copy** (Cmd+C / Ctrl+C), and **paste it here**
 >
 > I know that's a few steps — but you only need to do this once.
 
-**Path C: They have no signature at all**
+If the BDR says they have an `.html` file already (from their manager or GTM Engineering), take the shortcut:
 
-> No problem — let's create one. You'll need:
-> - Your full name
-> - Your title
-> - Your phone number
-> - Your HqO email
->
-> Tell me those details and I'll generate a clean HTML signature for you.
+> Perfect — just **right-click** the `.html` file → **Open with** a text editor (NOT a browser), **select all**, **copy**, and **paste it here**.
+
+If the BDR has no signature at all:
+
+> No problem — let's create one. Tell me your full name, title, phone number, and HqO email, and I'll generate one for you.
 
 When they provide the details, generate a simple, professional HTML signature block:
 
@@ -150,7 +145,7 @@ When they provide the details, generate a simple, professional HTML signature bl
 
 Show the generated HTML to the BDR and ask if it looks right. Offer to adjust.
 
-**After receiving the signature HTML (any path):**
+**After receiving the signature HTML:**
 
 1. Save the raw HTML string to `config/settings.json` under `bdr.signature_html`
 2. Confirm to the BDR:
@@ -209,7 +204,7 @@ After results come in, walk them through the output:
 >
 > **Company Overview** — Background pulled from **Clay** and **HubSpot**, enriched with Ozzy's findings when available.
 >
-> **Key Contacts** — People at the company mapped by priority using **Clay** (contact discovery) and **HubSpot** (existing records). Asset Managers and executives come first because they're our primary buyers. When Ozzy runs, it also surfaces LinkedIn activity, press mentions, and conference appearances for top contacts — these become personalized email openers.
+> **Key Contacts** — People at the company mapped by priority using **Clay** (contact discovery) and **HubSpot** (existing records). Asset Managers and executives come first because they're our primary buyers. When Ozzy runs, it also surfaces LinkedIn activity, press mentions, and conference appearances for top contacts — these become personalized email openers. If Clay finds contacts that aren't in HubSpot yet, the plugin will ask if you want to add them to the CRM — that way the whole team can see them.
 >
 > **Customer Parallels** — Existing HqO customers in the same market, pulled from **HubSpot**, that we can reference in outreach.
 >

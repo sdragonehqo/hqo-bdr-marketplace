@@ -4,7 +4,7 @@ How Ozzy's output fields feed into each step of the prospecting workflow.
 
 ## Into HubSpot (Immediate — CRM sync)
 
-After Ozzy's response is parsed, all non-empty `clay_*` fields are pushed to the HubSpot company record via `manage_crm_objects`. This happens automatically before any downstream workflow steps.
+After Ozzy's response is parsed and presented to the BDR, the BDR reviews the findings and approves the HubSpot push. Once confirmed, all non-empty `clay_*` fields are pushed to the HubSpot company record via `manage_crm_objects`. If the BDR declines, the data is still available in-session but not persisted to the CRM.
 
 | Ozzy Field | HubSpot Property | Notes |
 |------------|------------------|-------|
@@ -25,6 +25,12 @@ After Ozzy's response is parsed, all non-empty `clay_*` fields are pushed to the
 | `clay_icp_data_gaps` | Transparency — what Ozzy could NOT verify. BDR decides if gaps matter. |
 | `clay_recommended_action` | Go/no-go recommendation. Present prominently. |
 | `clay_estimated_deal_value` | Compare with Step 2 calculation. If significantly different, note discrepancy. |
+
+## Clay Contacts → HubSpot (Step 3 — contact creation)
+
+During Contact Mapping, Clay discovers contacts that may not exist in HubSpot. After comparing Clay's results against existing HubSpot contacts (matched by email), the plugin presents any missing contacts to the BDR for approval. Once confirmed, missing contacts are created in HubSpot via `manage_crm_objects` and associated with the company record. This keeps the CRM up to date with the contacts the BDR is about to email.
+
+See `skills/prospecting/SKILL.md` → "Contact Push to HubSpot" for the full flow and rules.
 
 ## Into Contact Mapping (Step 3 — enrichment)
 

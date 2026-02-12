@@ -31,7 +31,7 @@ Most CRE orgs manage assets, not tenant relationships. No system to measure tena
 1. **Company ID** — Identify by colloquial name, search HubSpot for records, Clay enrichment (portfolio size, markets, ownership, news)
 2. **ICP Scoring** — Calculate deal size (sf × $0.04), assign tier, flag timing triggers. See `references/icp-criteria.md`
 2b. **Deep Research (Ozzy)** — If `config/settings.json` has `deep_research.enabled = true`, call the research wrapper for autonomous web research. Validates ICP, enriches portfolio details, surfaces people intel for Tier 1+2 contacts. See `skills/deep-research/SKILL.md`. If wrapper is unreachable, continue with Clay+HubSpot data. If Ozzy returns "Not a Fit", **stop and present the conflict to BDR** before continuing.
-3. **Contact Mapping** — HubSpot existing contacts + Clay discovery by title, prioritize by persona hierarchy. Enrich Tier 1+2 contacts with deep research people intel when available. See `references/persona-angles.md`
+3. **Contact Mapping** — HubSpot existing contacts + Clay discovery by title, prioritize by persona hierarchy. Enrich Tier 1+2 contacts with deep research people intel when available. Push Clay-discovered contacts missing from HubSpot to the CRM (with BDR approval). See `references/persona-angles.md` and contact push rules below.
 4. **Engagement Validation** — For CONNECTED/REPLIED contacts, pull actual engagement content. See validation rules below.
 5. **Customer Parallels** — HubSpot query: lifecyclestage=customer AND matching city/state. See `references/customer-references.md`
 6. **Email Generation** — Confirm BDR identity, draft per guidelines in `email-generation` skill, webhook via `/hqo:push-drafts`
@@ -50,6 +50,39 @@ Contact status labels (CONNECTED, REPLIED, ATTEMPTED) are unreliable. Always pul
 | Referral | "Contact [Name] instead" | Add referred contact, deprioritize original |
 | Stale | Last engagement >6 months | Treat as cold, not warm |
 | Auto-reply false positive | Status=REPLIED but OOO/auto-response | Reclassify |
+
+## Contact Push to HubSpot
+
+During Contact Mapping (Step 3), Clay may discover contacts that don't exist in HubSpot yet. These should be created as HubSpot contacts so the rest of the team has visibility.
+
+**How it works:**
+
+1. After Clay returns contacts and you've searched HubSpot for existing records, compare the two lists.
+2. Identify contacts that Clay found but HubSpot does NOT have (match by email address).
+3. Present the missing contacts to the BDR:
+
+> Clay found **[N] contacts** that aren't in HubSpot yet:
+>
+> | Name | Title | Email | Persona Tier |
+> |------|-------|-------|-------------|
+> | [name] | [title] | [email] | Tier [1/2/3] |
+> | ... | ... | ... | ... |
+>
+> Want me to add these to HubSpot and associate them with **[Company Name]**?
+
+4. **Only push after the BDR approves.** Never auto-create contacts.
+5. When approved, use `manage_crm_objects` to create each contact with the data Clay provided (firstname, lastname, email, jobtitle, phone, company association).
+6. Associate each new contact with the company record in HubSpot.
+7. Confirm what was created:
+
+> ✓ **[N] contacts added to HubSpot** and associated with [Company Name].
+
+**Rules:**
+- **Always wait for BDR approval** before creating contacts. Never auto-push.
+- Match by **email address** to determine if a contact already exists. If Clay provides an email that's already in HubSpot, skip that contact (it's a duplicate, not missing).
+- Only push contacts with a valid email address. Skip contacts where Clay didn't find an email.
+- If the BDR declines, continue the workflow — the Clay contacts are still available in-session for email generation.
+- If any individual contact creation fails, report the failure and continue with the rest. Don't stop the whole batch.
 
 ## Output Sections
 
