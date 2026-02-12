@@ -166,10 +166,13 @@ Ask these one at a time, waiting for each answer:
 
 1. "What's your first name?"
 2. "What's your HqO email address?"
-3. Ask tone preference using a multiple-choice question:
+3. "What's your LinkedIn profile URL?" (e.g., `https://linkedin.com/in/yourname`)
+4. Ask tone preference using a multiple-choice question:
    - **Professional** (recommended) — polished and direct
    - **Casual** — conversational and warm
    - **Consultative** — advisory and insight-led
+
+The LinkedIn URL is used when requesting deep research from Ozzy — it tells the research bot who's requesting, so it can tailor people intel to your network and context.
 
 Save answers to `config/settings.json` (the `signature_html` field was already saved in Phase 3):
 ```json
@@ -178,13 +181,14 @@ Save answers to `config/settings.json` (the `signature_html` field was already s
     "name": "[their name]",
     "email": "[their email]",
     "tone": "[their choice]",
+    "linkedin_url": "[their LinkedIn URL]",
     "signature_html": "[already saved from Phase 3]"
   }
 }
 ```
 
 Confirm:
-> Got it — you're saved as **[Name]** ([email]), tone set to **[tone]**.
+> Got it — you're saved as **[Name]** ([email]), tone set to **[tone]**, LinkedIn connected.
 
 ### Phase 5: Test Run
 

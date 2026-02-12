@@ -14,15 +14,17 @@ Walk the BDR through reconfiguring their settings.
    - "Here are your current settings:"
    - **Name:** [bdr.name]
    - **Email:** [bdr.email]
+   - **LinkedIn:** [bdr.linkedin_url, or "✗ Not configured" if empty]
    - **Tone:** [bdr.tone]
    - **Signature:** [show "✓ Configured" if `bdr.signature_html` is non-empty, or "✗ Not configured" if empty]
 2. Ask: "What would you like to update?" — let them pick one or more:
    - Name
    - Email
+   - LinkedIn URL
    - Tone preference (professional, casual, or consultative)
    - Email signature
 3. For each selected item, walk through the update:
-   - **Name/Email/Tone:** Ask for the new value, confirm, save.
+   - **Name/Email/LinkedIn URL/Tone:** Ask for the new value, confirm, save.
    - **Signature:** Follow the same walkthrough as onboarding Phase 3:
      - If they have an HTML file: right-click → open with text editor → copy raw HTML → paste here
      - If they have a signature in Gmail: extract via Gmail settings → Google Doc → Download as HTML → open in text editor → paste here

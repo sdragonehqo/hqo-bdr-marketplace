@@ -47,13 +47,15 @@ Look through the search results for a message from the Ozzy bot (user ID: `deep_
 Send a message to the `#ozzy` Slack channel using the Slack MCP `slack_send_message` tool:
 
 - **channel_id:** Use `deep_research.slack_channel_id` from settings
-- **message:** Format as: `<@U0AFG7T5ALQ> ICP:{hubspot_id},{domain},{company_name}`
+- **message:** Format as: `<@U0AFG7T5ALQ> ICP:{hubspot_id},{domain},{company_name},{requester_linkedin_url}`
 
 The `<@U0AFG7T5ALQ>` is the Slack user mention tag for the Ozzy bot — this is what actually pings the bot and triggers research. Plain text `@Ozzy` does NOT work. Always use the `<@...>` format.
 
+The `requester_linkedin_url` comes from `config/settings.json` → `bdr.linkedin_url`. This tells Ozzy who is requesting the research so it can tailor people intel to the requester's network and context.
+
 Example:
 ```
-<@U0AFG7T5ALQ> ICP:61514582769,gcomfort.com,George Comfort & Sons
+<@U0AFG7T5ALQ> ICP:61514582769,gcomfort.com,George Comfort & Sons,https://linkedin.com/in/adam-rodriguez
 ```
 
 **Tell the BDR:** "Running deep research on [company] — Ozzy is crawling the web for detailed portfolio and people intel. This takes about a minute..."
