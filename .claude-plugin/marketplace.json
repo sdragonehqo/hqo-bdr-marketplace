@@ -9,7 +9,7 @@
     {
       "name": "hqo-bdr-toolkit",
       "source": "./hqo-bdr-toolkit",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "description": "Research accounts, generate personalized outreach, and create Gmail drafts — all from Cowork. 2.5.0: Clean output, step-by-step pauses, auto signature extraction, removed LinkedIn config."
     }
   ]
