@@ -6,7 +6,7 @@ Cowork plugin for HqO BDR prospecting — research target accounts, generate per
 
 1. **Research** — Enriches target companies via Clay + HubSpot (portfolio size, markets, contacts, news)
 2. **Score** — Calculates ICP fit and deal size tier
-3. **Deep Research** — Optionally calls Ozzy (autonomous web agent) to validate ICP, verify portfolio details, and surface people intel (LinkedIn, press, conferences) for key contacts
+3. **Deep Research** — Sends `@Ozzy` in the `#ozzy` Slack channel to trigger autonomous web research. Ozzy validates ICP, verifies portfolio details, and surfaces people intel (LinkedIn, press, conferences) for key contacts. Results are read back from Slack automatically.
 4. **Map** — Discovers and validates contacts by persona priority, enriched with Ozzy's people intel
 5. **Write** — Generates Challenger-method emails with customer proof points and contact-specific openers
 6. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
@@ -48,6 +48,7 @@ Jump straight to prospecting:
 |-----------|---------|----------|
 | HubSpot | CRM lookup, contact mapping, engagement history | Yes |
 | Clay | Company enrichment, contact discovery, news/triggers | Yes |
+| Slack | Deep research via Ozzy (`@Ozzy` in `#ozzy` channel) + reading results | Yes |
 | Google Gmail | Read and search your inbox | Yes |
 | Gmail | Create drafts directly in your inbox | Yes |
 | ZoomInfo | Supplemental contact enrichment | Optional |
@@ -89,4 +90,4 @@ hqo-bdr-outreach/
 
 The previous Claude Projects setup loaded a 500-line instruction set every conversation, hitting token limits and rate caps. This plugin uses on-demand skill loading — only the relevant files load when a command runs. Research loads prospecting knowledge; outreach adds email generation on top. References only load when the parent skill needs them.
 
-No external tools to configure. Everything flows through Cowork's built-in MCP connectors that the BDR already has enabled.
+No external tools to configure. Everything flows through Cowork's built-in MCP connectors (HubSpot, Clay, Slack, Gmail) that the BDR already has enabled.
