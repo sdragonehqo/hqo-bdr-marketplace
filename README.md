@@ -16,7 +16,7 @@ In the Claude Desktop app (Cowork mode):
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| hqo-bdr-toolkit | 2.0.0 | Research accounts, generate outreach, create Gmail drafts |
+| hqo-bdr-toolkit | 2.6.1 | Research accounts, generate outreach, create Gmail drafts |
 
 ## First Time Setup
 
