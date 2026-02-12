@@ -79,11 +79,17 @@ Look for messages from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`).
 
 If Ozzy posts multiple messages (narrative + JSON), use the one with the structured JSON code block.
 
-### Step 5: Push to HubSpot
+### Step 5: Review & Push to HubSpot
 
-After successfully parsing Ozzy's JSON response, immediately update the company record in HubSpot with all `clay_*` fields. This ensures deep research data is persisted in the CRM — not just used in this session.
+After successfully parsing Ozzy's JSON response, present the results to the BDR for review before pushing to HubSpot.
 
-Use the HubSpot MCP `manage_crm_objects` tool to update the company:
+**Present the results first.** Show the BDR a summary of what Ozzy found — use the Deep Research Insights output format (see Output Section below). Let them review the ICP determination, portfolio data, and recommended action.
+
+**Then ask for approval to push:**
+
+> "Ready to push these deep research findings to the HubSpot record for [company]? This updates the `clay_*` fields on the company record so the team can see them."
+
+**Only push after the BDR confirms.** Use the HubSpot MCP `manage_crm_objects` tool:
 
 - **objectType:** `companies`
 - **objectId:** The HubSpot company record ID (the `hubspot_id` from Ozzy's response)
@@ -112,10 +118,11 @@ The HubSpot company object has matching properties for every `clay_*` field in t
 **Rules:**
 - Only push fields that have non-empty values. Skip any field where the value is `""` or `null`.
 - Do NOT push `hubspot_id` — that's the record identifier, not a property to update.
-- This push happens automatically — do NOT ask the BDR for confirmation. The data is enrichment, not a destructive change.
-- If the HubSpot update fails, log the error and continue the workflow. The deep research data is still available in-session even if the CRM push fails.
+- **Always wait for BDR approval** before pushing. Never auto-push.
+- If the BDR declines the push, continue the workflow — the data is still available in-session.
+- If the HubSpot update fails, log the error and continue the workflow.
 
-**Tell the BDR:** "Deep research complete — pushed Ozzy's findings to the HubSpot record so they're saved for the team."
+**After successful push, tell the BDR:** "Done — Ozzy's findings are now on the HubSpot record for the team."
 
 ## Handling the Response
 
