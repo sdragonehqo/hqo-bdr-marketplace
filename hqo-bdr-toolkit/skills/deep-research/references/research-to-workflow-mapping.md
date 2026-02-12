@@ -2,6 +2,16 @@
 
 How Ozzy's output fields feed into each step of the prospecting workflow.
 
+## Into HubSpot (Immediate — CRM sync)
+
+After Ozzy's response is parsed, all non-empty `clay_*` fields are pushed to the HubSpot company record via `manage_crm_objects`. This happens automatically before any downstream workflow steps.
+
+| Ozzy Field | HubSpot Property | Notes |
+|------------|------------------|-------|
+| All `clay_*` fields | Same name (1:1 match) | Only push non-empty values. Skip `hubspot_id` (it's the record ID, not a property). |
+
+**Why:** Persists deep research in the CRM so other BDRs and the team see Ozzy's findings even outside the plugin. Also means re-running research on the same company will overwrite stale data.
+
 ## Into ICP Scoring (Step 2 — validation/override)
 
 | Ozzy Field | How It's Used |

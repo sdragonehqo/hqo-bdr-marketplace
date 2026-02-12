@@ -21,7 +21,28 @@ Deep research runs **after** Step 2 (ICP Scoring) and **before** Step 3 (Contact
 
 Read the Slack channel config from `config/settings.json` under `deep_research`.
 
-### Step 1: Send Request
+### Step 1: Check for Existing Research (Cache Check)
+
+Before triggering a new Ozzy run, check if research already exists for this company in the `#ozzy` channel.
+
+Search the channel using the Slack MCP `slack_search_public` tool:
+
+- **query:** The `hubspot_id` value (e.g., `61514582769`) with `in:<#C0AEK5BFHSA>`
+
+**Important:** Search for the `hubspot_id`, NOT the company name or domain. The `hubspot_id` is the only stable identifier — company names can vary and domains can change, but the HubSpot record ID is immutable.
+
+Look through the search results for a message from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`) that contains a JSON code block with `"hubspot_id": "{your_id}"`.
+
+**If a matching response is found:**
+- Parse the JSON from the existing message
+- **Tell the BDR:** "Found existing deep research for [company] — using cached results from [clay_last_enriched date]."
+- Skip directly to **Step 5: Push to HubSpot** (the data may not have been pushed previously, or may need refreshing)
+- Then continue to **Handling the Response**
+
+**If no matching response is found:**
+- Continue to Step 2 to trigger a fresh Ozzy run
+
+### Step 2: Send Request
 
 Send a message to the `#ozzy` Slack channel using the Slack MCP `slack_send_message` tool:
 
@@ -37,11 +58,11 @@ Example:
 
 **Tell the BDR:** "Running deep research on [company] — Ozzy is crawling the web for detailed portfolio and people intel. This takes about a minute..."
 
-### Step 2: Wait for Response
+### Step 3: Wait for Response
 
 Wait `deep_research.wait_seconds` (default: 90 seconds) for Ozzy to process.
 
-### Step 3: Read Response
+### Step 4: Read Response
 
 Read the `#ozzy` channel using the Slack MCP `slack_read_channel` tool:
 
@@ -57,6 +78,44 @@ Look for messages from the Ozzy bot (user ID: `deep_research.ozzy_bot_user_id`).
 3. The response will match the schema in `references/ozzy-response-schema.md`
 
 If Ozzy posts multiple messages (narrative + JSON), use the one with the structured JSON code block.
+
+### Step 5: Push to HubSpot
+
+After successfully parsing Ozzy's JSON response, immediately update the company record in HubSpot with all `clay_*` fields. This ensures deep research data is persisted in the CRM — not just used in this session.
+
+Use the HubSpot MCP `manage_crm_objects` tool to update the company:
+
+- **objectType:** `companies`
+- **objectId:** The HubSpot company record ID (the `hubspot_id` from Ozzy's response)
+- **properties:** All `clay_*` fields from Ozzy's JSON response, mapped 1:1 as property name → value
+
+The HubSpot company object has matching properties for every `clay_*` field in the response schema. Push them all:
+
+| Ozzy Response Field | HubSpot Company Property |
+|---------------------|--------------------------|
+| `clay_icp` | `clay_icp` |
+| `clay_company_tier` | `clay_company_tier` |
+| `clay_icp_fit_score` | `clay_icp_fit_score` |
+| `clay_icp_fit_rating` | `clay_icp_fit_rating` |
+| `clay_icp_reasons_for` | `clay_icp_reasons_for` |
+| `clay_icp_reasons_against` | `clay_icp_reasons_against` |
+| `clay_icp_data_gaps` | `clay_icp_data_gaps` |
+| `clay_portfolio_total_sf` | `clay_portfolio_total_sf` |
+| `clay_portfolio_num_buildings` | `clay_portfolio_num_buildings` |
+| `clay_portfolio_markets` | `clay_portfolio_markets` |
+| `clay_portfolio_asset_classes` | `clay_portfolio_asset_classes` |
+| `clay_estimated_deal_value` | `clay_estimated_deal_value` |
+| `clay_recommended_action` | `clay_recommended_action` |
+| `clay_research_summary` | `clay_research_summary` |
+| `clay_last_enriched` | `clay_last_enriched` |
+
+**Rules:**
+- Only push fields that have non-empty values. Skip any field where the value is `""` or `null`.
+- Do NOT push `hubspot_id` — that's the record identifier, not a property to update.
+- This push happens automatically — do NOT ask the BDR for confirmation. The data is enrichment, not a destructive change.
+- If the HubSpot update fails, log the error and continue the workflow. The deep research data is still available in-session even if the CRM push fails.
+
+**Tell the BDR:** "Deep research complete — pushed Ozzy's findings to the HubSpot record so they're saved for the team."
 
 ## Handling the Response
 
@@ -111,11 +170,14 @@ This intel feeds directly into email personalization in Step 5. See `references/
 
 | Scenario | Action |
 |----------|--------|
+| Cache check finds existing research (Step 1) | Use cached results. Skip Ozzy request + wait. Still push to HubSpot (Step 5) and continue to Handling the Response. |
+| Cache check search fails | Treat as cache miss — proceed to Step 2 and trigger a fresh Ozzy run. |
 | Slack send fails or Ozzy bot is offline | Log "Deep research unavailable — continuing with Clay+HubSpot data." Continue workflow. |
 | No response from Ozzy in `#ozzy` after `max_wait_seconds` | Read channel one more time. If still no response, continue workflow without deep research. |
 | Response missing fields | Use whatever fields are present. Missing fields = use Clay/HubSpot data for those. |
 | `clay_icp` = "Not a Fit" | **Hard stop.** Present conflict. Require BDR confirmation. See ICP Validation above. |
-| Multiple responses in channel (from previous runs) | Match on `hubspot_id` inside the JSON to find the correct response. Use the most recent matching message. |
+| Multiple responses for same `hubspot_id` | Use the most recent matching message (closest to current time). |
+| HubSpot update fails after successful Ozzy response | Log the error. Deep research data is still available in-session — continue the workflow. Note in output: "Could not sync deep research to HubSpot." |
 
 ## Graceful Degradation
 

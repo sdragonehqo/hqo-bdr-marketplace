@@ -2,6 +2,8 @@
 
 > **Delivery:** Ozzy posts this JSON as a code block in the `#ozzy` Slack channel.
 > The agent reads it via the Slack MCP `slack_read_channel` tool.
+>
+> **HubSpot Sync:** After parsing, all non-empty `clay_*` fields are pushed to the matching HubSpot company properties via `manage_crm_objects`. The field names are 1:1 — no mapping needed.
 
 Ozzy (OpenClaw agent) returns structured JSON from autonomous web research. All fields use the `clay_` prefix — these come from Ozzy's research wrapper, NOT from the Clay MCP connector.
 
