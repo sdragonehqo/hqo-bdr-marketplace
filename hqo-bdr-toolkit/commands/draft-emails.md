@@ -8,6 +8,17 @@ arguments: []
 
 Create Gmail drafts for all generated emails using Cowork's built-in Gmail connector. No external tools or API keys needed.
 
+## Output Rules
+
+**Do NOT print internal reasoning, `<thinking>` tags, tool-call rationale, JSON assembly logic, signature handling details, or decision-tree logic in the chat.** The BDR should only see clean status updates:
+
+- Brief confirmation when the draft file is saved (with file link)
+- The approval prompt ("Ready to create these drafts in Gmail?")
+- A one-line status per draft as it's created (e.g., "✓ Draft 1/8: Claire Outram — created")
+- Final summary (count created, any skips/failures)
+
+All internal processing — reading settings, assembling HTML bodies, appending signatures, converting line breaks, calling the Gmail MCP tool, handling errors — stays **completely behind the scenes**. Do NOT narrate what you are doing, which tools you are calling, or how you are building each draft.
+
 ## Prerequisites
 
 - Emails must have been generated in this session (via `/hqo:research`)

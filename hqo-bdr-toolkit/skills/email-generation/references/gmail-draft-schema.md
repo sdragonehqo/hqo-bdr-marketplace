@@ -1,5 +1,9 @@
 # Gmail Draft Schema — Direct MCP
 
+## Output Rules
+
+**Do NOT print internal reasoning, `<thinking>` tags, tool-call rationale, JSON assembly logic, or signature handling details in the chat.** When creating drafts, the BDR should only see clean status updates — one line per draft created, plus a final summary. All internal processing (body assembly, signature append, HTML conversion, MCP tool calls) stays completely behind the scenes.
+
 ## Overview
 
 After email generation, the `/hqo:draft-emails` command first saves all emails to a JSON review file, then creates Gmail drafts directly using Cowork's built-in Gmail MCP connector. No webhooks, no API keys, no external tools.
