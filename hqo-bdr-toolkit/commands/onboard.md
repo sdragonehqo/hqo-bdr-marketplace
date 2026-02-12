@@ -69,7 +69,7 @@ Check each required connector by attempting a lightweight call. Explain what eac
 - If neither works: Walk through connecting both, one at a time
 
 **Slack:**
-> Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run outreach on a company, the plugin sends a message to the `#ozzy` Slack channel with `@Ozzy` to trigger it. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel. The plugin reads those results right from Slack.
+> Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run outreach on a company, the plugin sends a message to the `#ozzy` Slack channel that mentions `<@U0AFG7T5ALQ>` (the Ozzy bot) to trigger it. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel. The plugin reads those results right from Slack.
 >
 > Let me check if Slack is connected...
 
@@ -166,7 +166,7 @@ After results come in, walk them through the output:
 >
 > **ICP Score** — Rates how well the company fits our ideal customer profile, based on portfolio size and deal potential. This comes from **Clay** (company enrichment) and **HubSpot** (CRM data).
 >
-> **Deep Research Insights** — If deep research is enabled, the plugin sends a message to the **#ozzy Slack channel** with `@Ozzy` to trigger autonomous web research. Ozzy crawls company websites, press releases, SEC filings, LinkedIn profiles, and conference speaker lists. After about a minute, Ozzy posts back structured results — portfolio verification, ICP validation, and people intel — which the plugin reads directly from Slack. This goes far beyond what Clay or HubSpot provide.
+> **Deep Research Insights** — If deep research is enabled, the plugin sends a message to the **#ozzy Slack channel** mentioning `<@U0AFG7T5ALQ>` (the Ozzy bot) to trigger autonomous web research. Ozzy crawls company websites, press releases, SEC filings, LinkedIn profiles, and conference speaker lists. After about a minute, Ozzy posts back structured results — portfolio verification, ICP validation, and people intel — which the plugin reads directly from Slack. This goes far beyond what Clay or HubSpot provide.
 >
 > **Company Overview** — Background pulled from **Clay** and **HubSpot**, enriched with Ozzy's findings when available.
 >
@@ -198,7 +198,7 @@ Then:
 > |------|-------------|
 > | **HubSpot** | CRM lookups — company records, contacts, engagement history |
 > | **Clay** | Company enrichment — portfolio size, markets, news, additional contacts |
-> | **Ozzy (via Slack)** | Deep web research — sends `@Ozzy` in `#ozzy` channel, gets back verified portfolio data, ICP validation, and people intel (LinkedIn, press, conferences) |
+> | **Ozzy (via Slack)** | Deep web research — mentions `<@U0AFG7T5ALQ>` in `#ozzy` channel to trigger the bot, gets back verified portfolio data, ICP validation, and people intel (LinkedIn, press, conferences) |
 > | **Gmail** | Creates draft emails directly in your inbox for review before sending |
 >
 > Start with `/hqo:outreach [company]` whenever you're ready to prospect a new account. The plugin handles the rest — pulling data from HubSpot and Clay, calling Ozzy for deep research via Slack, then generating personalized emails and putting them in your Gmail drafts.

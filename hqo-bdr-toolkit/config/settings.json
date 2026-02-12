@@ -10,7 +10,7 @@
     "slack_channel_id": "C0AEK5BFHSA",
     "slack_channel_name": "#ozzy",
     "ozzy_bot_user_id": "U0AFG7T5ALQ",
-    "request_format": "@Ozzy ICP:{hubspot_id},{domain},{company_name}",
+    "request_format": "<@U0AFG7T5ALQ> ICP:{hubspot_id},{domain},{company_name}",
     "wait_seconds": 90,
     "max_wait_seconds": 180
   }

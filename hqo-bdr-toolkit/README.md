@@ -6,7 +6,7 @@ Cowork plugin for HqO BDR prospecting — research target accounts, generate per
 
 1. **Research** — Enriches target companies via Clay + HubSpot (portfolio size, markets, contacts, news)
 2. **Score** — Calculates ICP fit and deal size tier
-3. **Deep Research** — Sends `@Ozzy` in the `#ozzy` Slack channel to trigger autonomous web research. Ozzy validates ICP, verifies portfolio details, and surfaces people intel (LinkedIn, press, conferences) for key contacts. Results are read back from Slack automatically.
+3. **Deep Research** — Mentions `<@U0AFG7T5ALQ>` (the Ozzy bot) in the `#ozzy` Slack channel to trigger autonomous web research. Ozzy validates ICP, verifies portfolio details, and surfaces people intel (LinkedIn, press, conferences) for key contacts. Results are read back from Slack automatically.
 4. **Map** — Discovers and validates contacts by persona priority, enriched with Ozzy's people intel
 5. **Write** — Generates Challenger-method emails with customer proof points and contact-specific openers
 6. **Deliver** — Saves a draft review file, then creates Gmail drafts directly in your inbox
@@ -48,7 +48,7 @@ Jump straight to prospecting:
 |-----------|---------|----------|
 | HubSpot | CRM lookup, contact mapping, engagement history | Yes |
 | Clay | Company enrichment, contact discovery, news/triggers | Yes |
-| Slack | Deep research via Ozzy (`@Ozzy` in `#ozzy` channel) + reading results | Yes |
+| Slack | Deep research via Ozzy (`<@U0AFG7T5ALQ>` mention in `#ozzy` channel) + reading results | Yes |
 | Google Gmail | Read and search your inbox | Yes |
 | Gmail | Create drafts directly in your inbox | Yes |
 | ZoomInfo | Supplemental contact enrichment | Optional |
