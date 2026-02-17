@@ -40,7 +40,7 @@ All internal processing — reading settings, assembling HTML bodies, appending 
    - The draft file stores plain-text bodies (signature is appended at Gmail creation time, not in the file)
    - Present the file link to BDR in chat so they can review before Gmail creation
    - Ask BDR: "Ready to create these drafts in Gmail?"
-5. **Create Drafts** — After BDR confirms, for each validated email, use the Gmail MCP `create_email_draft` tool:
+5. **Create Drafts** — After BDR confirms, for each validated email, use the Hqo Gmail MCP `create_draft` tool:
    - `recipient_email`: contact's email address
    - `subject`: generated subject line
    - `body`: assembled HTML body (see Signature Assembly below)
@@ -61,7 +61,7 @@ For each draft, assemble the final `body` at creation time:
 3. If `signature_html` is non-empty:
    - Append `<br><br>` after the sign-off as a spacer
    - Append the raw `signature_html` value
-   - Set `is_html: true` on the `create_email_draft` call
+   - Set `is_html: true` on the `create_draft` call
 4. If `signature_html` is empty:
    - Send as plain text (`is_html: false`) — no signature block
    - Warn the BDR: "No signature configured — drafts won't include a signature. Run `/hqo:onboard` to add one."

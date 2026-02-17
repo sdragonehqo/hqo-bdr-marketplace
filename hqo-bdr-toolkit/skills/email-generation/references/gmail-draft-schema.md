@@ -14,7 +14,7 @@ After email generation, the `/hqo:draft-emails` command first saves all emails t
 2. Validated and sorted by priority
 3. Saved to `drafts-[company-slug]-[date].json` in the workspace folder
 4. BDR reviews the file and confirms
-5. Each draft is created in Gmail via `create_email_draft` MCP tool call
+5. Each draft is created in Gmail via `create_draft` MCP tool call
 6. Results reported in Cowork chat
 
 ## Draft Review File Format
@@ -29,8 +29,8 @@ The JSON file saved before Gmail creation:
     "generated_at": "2026-02-10T14:30:00Z",
     "total_drafts": 8,
     "total_skipped": 2,
-    "bdr_name": "Sal",
-    "bdr_email": "sal.dragone@hqo.co"
+    "bdr_name": "[BDR Name]",
+    "bdr_email": "[BDR Email]"
   },
   "drafts": [
     {
@@ -44,7 +44,7 @@ The JSON file saved before Gmail creation:
       },
       "email": {
         "subject": "Brookfield's tenant retention gap",
-        "body": "Hi Claire,\n\nBody text...\n\nBest,\nSal"
+        "body": "Hi Claire,\n\nBody text...\n\nBest,\n[BDR Name]"
       }
     }
   ],
@@ -60,7 +60,7 @@ The JSON file saved before Gmail creation:
 
 ## Per-Draft Gmail MCP Call
 
-Each draft maps to a single `create_email_draft` tool call:
+Each draft maps to a single `create_draft` tool call:
 
 | Field | Maps To | Example |
 |-------|---------|---------|
@@ -68,11 +68,11 @@ Each draft maps to a single `create_email_draft` tool call:
 | Subject line | `subject` | `Brookfield's tenant retention gap` |
 | Email body + signature | `body` | Assembled HTML (see below) |
 | HTML flag | `is_html` | `true` (when signature present) |
-| BDR email | Sender (auto from Gmail connector) | `sal.dragone@hqo.co` |
+| BDR email | Sender (auto from Gmail connector) | `[bdr.email from settings]` |
 
 ### Body Assembly (Signature Append)
 
-The `body` sent to `create_email_draft` is assembled at draft creation time (not during email generation):
+The `body` sent to `create_draft` is assembled at draft creation time (not during email generation):
 
 1. Take the plain-text email body (with `\n` line breaks)
 2. Convert line breaks to `<br>` for HTML rendering
@@ -80,13 +80,13 @@ The `body` sent to `create_email_draft` is assembled at draft creation time (not
 4. If `signature_html` is non-empty:
    - Append `<br><br>` as a spacer after the sign-off
    - Append the raw `signature_html` value
-   - Set `is_html: true` on the `create_email_draft` call
+   - Set `is_html: true` on the `create_draft` call
 5. If `signature_html` is empty (BDR hasn't provided one yet):
    - Send as plain text (`is_html: false`) with no signature block
 
 Example assembled body:
 ```html
-Hi Claire,<br><br>Body text here...<br><br>Best,<br>Sal<br><br><table cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif;">...</table>
+Hi Claire,<br><br>Body text here...<br><br>Best,<br>[BDR Name]<br><br><table cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif;">...</table>
 ```
 
 ## Priority Order

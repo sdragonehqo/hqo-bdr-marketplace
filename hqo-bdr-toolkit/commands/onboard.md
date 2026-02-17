@@ -82,18 +82,18 @@ Check each required connector by attempting a lightweight call. Explain what eac
 - If it works: "Clay is connected! You have credits available."
 - If it fails: Same guided flow as HubSpot — walk them through Settings → Connectors → Clay → Connect
 
-**Gmail (BOTH connectors):**
-> There are two Gmail connectors, and you need both:
-> - **Google Gmail** lets the plugin read and search your inbox
-> - **Gmail** (the second one) lets it create drafts in your inbox
+**Gmail (Hqo Gmail MCP):**
+> The **Hqo Gmail** extension lets the plugin read your inbox and create drafts.
 >
-> Let me check both...
+> Let me check if it's connected...
 
-- Test the read connector (e.g., `read_gmail_profile`)
-- Test the draft connector (e.g., `get_profile` from the gmail tools or `list_labels`)
-- If both work: "Both Gmail connectors are connected!"
-- If only one works: Explain which one is missing and why they need it
-- If neither works: Walk through connecting both, one at a time
+- Test the connector by calling `authenticate_gmail` or `read_inbox`
+- If it works: "Gmail is connected!"
+- If it fails: "Gmail isn't connected yet. Here's how to fix it:"
+  - "Go to **Settings** (gear icon) → **Extensions** → find **hqo-gmail** → make sure it's **Enabled**"
+  - "You may need to authenticate — click through the Gmail permissions when prompted"
+  - "Come back here and tell me when you're done — I'll check again"
+  - Wait for them to confirm, then re-test
 
 **Slack:**
 > Slack is how the plugin talks to **Ozzy**, our deep research bot. When you run research on a company, the plugin can send a message to the `#ozzy` Slack channel to trigger Ozzy. Ozzy crawls the web — company sites, press releases, LinkedIn, conference lists — and posts back detailed portfolio and people intel.
@@ -138,14 +138,12 @@ Move on to Phase 4.
 
 **After the BDR confirms they sent the email:**
 
-Extract the signature automatically using the Gmail API:
+Extract the signature automatically using the Hqo Gmail MCP:
 
 1. Search sent emails for the signature source:
-   - Use `gmail:fetch_emails` with `query="subject:bdr toolkit"`, `label_ids=["SENT"]`, `include_payload=true`, `max_results=5`
-2. Get the message ID from the results
-3. Fetch the full message:
-   - Use `gmail:fetch_message_by_message_id` with the message ID and `format="full"`
-4. Extract the HTML content:
+   - Use `read_inbox` to search for the email with subject "bdr toolkit" in the sent folder
+2. From the results, locate the message with the matching subject
+3. Extract the HTML content from the message:
    - Navigate the message payload parts to find the `text/html` MIME part
    - The HTML body is base64url-encoded in `part.body.data`
    - Decode it (base64url with `===` padding for safety)
